@@ -148,21 +148,13 @@ def plot(kmeshx: int, kpath: list, d: int):
 
 if __name__ == '__main__':
 
-	name = "./GaAs_MLWF.klist_band"
+	name = "./generated.klist_band"
 	points = 11
 	d = 0 # 0: Auto
-	kpath1 = [[0.5,0,0],[0,0,0],[0.5,0.5,0],[5/8,5/8,1/4],[0,0,0]]
-	index1 = ['L','G','X','U','G']
 
-	kpath2 = [[0,0,0],[1,1,0]]
-	index2 = ['G','X2']
+	kpath = [[0.5,0,1],[0.5,0.5,0.5],[0,0,0],[0,0,1],[0.5,0,0.5],[0.75,0,0.75],[0,0,0]]
+	index = ['W','L','G','X','W','K','G']
 
-	kpath3 = [[0,0,0],[1,0,0]]
-	index3 = ['G','X']
+	main(name,points,kpath,index,d,1)
 
-	kpath4 = [[0.5,0,1],[0.5,0.5,0.5],[0,0,0],[0,0,1],[0.5,0,0.5],[0.75,0,0.75],[0,0,0]]
-	index4 = ['W','L','G','X','W','K','G']
-
-	main(name,points,kpath4,index4,d,1)
-
-	#plot(points,kpath4,d)
+	#plot(points,kpath,d)
