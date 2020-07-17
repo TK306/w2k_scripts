@@ -163,6 +163,6 @@ if __name__ == '__main__':
 	kpath4 = [[0.5,0,1],[0.5,0.5,0.5],[0,0,0],[0,0,1],[0.5,0,0.5],[0.75,0,0.75],[0,0,0]]
 	index4 = ['W','L','G','X','W','K','G']
 
-	#main(name,points,kpath4,index4,d,1)
+	main(name,points,kpath4,index4,d,1)
 
-	plot(points,kpath4,d)
+	#plot(points,kpath4,d)
