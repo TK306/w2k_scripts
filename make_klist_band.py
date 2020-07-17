@@ -80,7 +80,7 @@ def main(output_name: str, kmeshx: int, kpath: list, index_ls: list, d: int, ech
 		print('END', file=f)
 		
 	
-def plot(kmeshx: int, kpath: list, d: int):
+def check_kp(kmeshx: int, kpath: list, d: int):
 
 	kplen = []
 
@@ -157,4 +157,4 @@ if __name__ == '__main__':
 
 	main(name,points,kpath,index,d,1)
 
-	#plot(points,kpath,d)
+	#check_kp(points,kpath,d)
