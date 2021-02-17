@@ -38,7 +38,7 @@ def mapall():  # calculate all BZ coarsely
 
 
 def make_3Dband_npy():
-	anal.nake_3Dband_array([101, 101], 'up', w2k.case_path + 'mapall/data/', w2k.case_path + 'mapall/data.npy')
+	anal.make_3Dband_array([101, 101], 'up', w2k.case_path + 'mapall/data/', w2k.case_path + 'mapall/data.npy')
 
 
 def get_NLlist_coarse(ba_l):  # get coarse NL list between selected band
