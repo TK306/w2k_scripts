@@ -17,6 +17,7 @@ class W2k:
 		self.so = 0  # spin orbit on: 1, off: 0
 		self.orb = 0  # +U on: 1, off: 0
 		self.spol = 1  # spin polarized calculation on: 1, off: 0
+		self.spin_ls = ['up', 'dn']
 		self.parallel = 1  # parallel on: 1, off: 0
 
 		self.rkmax = 7
@@ -212,12 +213,12 @@ class W2k:
 			run_tetra.append('-p')
 
 		if spol:
-			for spin in ['-up', '-dn']:
-				run_lapw1s = run_lapw1 + [spin]
+			for spin in self.spin_ls:
+				run_lapw1s = run_lapw1 + ['-' + spin]
 				print('run ' + ' '.join(run_lapw1s))
 				subprocess.run(run_lapw1s)
-			for spin in ['-up', '-dn']:
-				run_lapw2s = run_lapw2 + [spin]
+			for spin in self.spin_ls:
+				run_lapw2s = run_lapw2 + ['-' + spin]
 				print('run ' + ' '.join(run_lapw2s))
 				subprocess.run(run_lapw2s)
 		else:
@@ -230,8 +231,8 @@ class W2k:
 		subprocess.run(['configure_int_lapw', '-b'] + int_list)
 
 		if spol:
-			for spin in ['-up', '-dn']:
-				run_tetras = run_tetra + [spin]
+			for spin in self.spin_ls:
+				run_tetras = run_tetra + ['-' + spin]
 				print('run ' + ' '.join(run_tetras))
 				subprocess.run(run_tetras)
 		else:
@@ -240,13 +241,8 @@ class W2k:
 
 		subprocess.call(["mkdir", "-p", outfol])
 
-		if spol:
-			spin_l = ['up', 'dn']
-		else:
-			spin_l = ['']
-
 		for s in range(spol + 1):
-			spin = spin_l[s]
+			spin = self.spin_ls[s]
 			n = 1
 			while 1:
 				path = self.filepath('.dos' + str(n) + 'eV' + spin)
@@ -304,12 +300,10 @@ class W2k:
 				run_spag.append('-up')
 
 		if spol:
-			run_lapw1s = run_lapw1 + ['-up']
-			print('run ' + ' '.join(run_lapw1s))
-			subprocess.run(run_lapw1s)
-			run_lapw1s = run_lapw1 + ['-dn']
-			print('run ' + ' '.join(run_lapw1s))
-			subprocess.run(run_lapw1s)
+			for spin in self.spin_ls:
+				run_lapw1s = run_lapw1 + ['-' + spin]
+				print('run ' + ' '.join(run_lapw1s))
+				subprocess.run(run_lapw1s)
 		else:
 			print('run ' + ' '.join(run_lapw1))
 			subprocess.run(run_lapw1)
