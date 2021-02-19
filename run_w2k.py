@@ -261,7 +261,7 @@ class W2k:
 					break
 				n += 1
 
-	def run_band(self, outfol, name, qtl, qtl_ls = [[1, 0]], atom_ls = [''], orbital_ls = ['']):  # calculate band dispersion
+	def run_band(self, outfol, name, qtl = 0, qtl_ls = [[1, 0]], atom_ls = [''], orbital_ls = ['']):  # calculate band dispersion
 		os.chdir(self.case_path)
 
 		if not outfol.startswith(self.case_path):
