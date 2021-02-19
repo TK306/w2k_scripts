@@ -77,7 +77,7 @@ def main(output_name: str, kmeshx: int, kpath: list, index_ls: list = [], d: int
 		print('END', file=f)
 
 
-def sonomama(output_name: str, kpath: list, d: int, echo: int):
+def sonomama(output_name: str, kpath: list, d: int, echo: int = 0):
 	out_ls = []
 	tail = '-8.00 8.00'
 
