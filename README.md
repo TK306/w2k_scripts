@@ -53,7 +53,7 @@ make_klist_band.main(output_name='example.klist_band', kmeshx=100, kpath=[[0, 0,
 | `output_name` | 出力ファイルのフルパス      | `str`                 |         | true     |
 | `kmeshx`      | k点数              | `int`                 |         | true     |
 | `kpath`       | kpath            | `float`の`list`の`list` |         | true     |
-| `index_ls`    | kpathに対応するインデックス | `str`の`list`          | '[]'   |          |
+| `index_ls`    | kpathに対応するインデックス | `str`の`list`          | `[]`   |          |
 | `d`           | 最大値（0で自動設定）      | `int`                 | `0`     |          |
 | `echo`        | ログの出力フラグ         | `int`                 | `1`       |          |
 
@@ -102,7 +102,7 @@ make_klist_band.sonomama(output_name='example.klist_band', kpath=kpath_list, d=d
 | `output_name` | 出力ファイルのフルパス | `str`                 |         | true     |
 | `kpath`       | kpath       | `float`の`list`の`list` |         | true     |
 | `d`           | 最大値         | `int`                 |         | true     |
-| `echo`        | ログの出力フラグ    | `int`                 | 0       |          |
+| `echo`        | ログの出力フラグ    | `int`                 | `0`       |          |
 
 # analyze_w2k.py
 .dosxevファイルや.agrファイルを読み込むコードです。
