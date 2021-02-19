@@ -12,6 +12,16 @@ WIEN2k第一原理プログラムによるバンド計算を行うスクリプ�
 
 を添付しています。
 
+## 目次
+* run_w2k.py
+  * 準備
+* make_klist_band.py
+  * 使用例
+* analyze_w2k.py
+* 計算コードの例
+  * kx-ky等エネルギー面を計算するコード
+  * SCF計算自動化コード
+
 ## run_w2k.py
 WIEN2k wrapper的なコードです。
 
@@ -201,9 +211,11 @@ for ky in range(kyn):
 ```
 
 ### SCF計算自動化コード
-イニシャライズからSCF計算、Total EnergyやDOS計算を自動化することで、k-meshやRKmax等のパラメータに対する収束性を確認することができます。
+イニシャライズからSCF計算、Total EnergyやDOS計算を自動化することで、k-meshやRKmax等のパラメータに対する収束性を確認することができます。  
+例として、rkmaxを5から10まで0.5 stepで変化させながらEtotとDOSとSCF計算時間を取得するコードをつくります。
 #### 色々インポート
-run_w2k.pyとmake_klist_band.pyをインポートします。
+run_w2k.pyとanalyze_w2k.pyをインポートします。
+これらのファイルは同じ階層に存在する必要があります。
 
 ```python
 import run_w2k
@@ -215,22 +227,132 @@ import analyze_w2k as an
 `igorwriter`はndarrayを.ibwファイルや.itxファイルとして保存できるので、便利です。
 
 ```python
-import subprocess as sp
+import igorwriter as iw
 ```
 
 #### クラスの呼び出し
-run_w2k.pyでは様々な機能・変数を一つのクラスにまとめています。
-`w2k = run_w2k.W2k(session)`としてクラスを呼び出した時点で、全ての変数が生成され、初期値が代入されています。
-
-`session`には、セッションのディレクトリの名前を文字列として入れてください。
-変数は`w2k.__init__`の中で初期値を設定しているので、適宜見に行ってください。
+`w2k.set_parallel(p)`によって、.machinesファイルを作成・編集し並列計算の準備を行います。  
+単純なk点並列のみに対応しています。
 
 ```python
 session = 'Co2MnGa'
 w2k = run_w2k.W2k(session)
-w2k.spol = 1
-w2k.rkmax = 7
-w2k.kmesh = 1000
-w2k.lmax = 10
-w2k.gmax = 12
+w2k.set_parallel(4)
+```
+
+#### 出力の準備
+Etot, SCF timeを格納する`list`を作成し、出力ディレクトリの作成も行います。
+
+```python
+etot_ls = []
+scf_time_ls = []
+convdir = w2k.case_path + 'conv/rkmax/'
+dosout = convdir + 'dos/'
+scfout = convdir + 'scf/'
+os.makedirs(dosout, exist_ok=True)
+os.makedirs(scfout, exist_ok=True)
+```
+
+#### パラメータの設定
+今回は`w2k.rkmax`をパラメータとして回します。他のパラメータで試す場合は、ここを変えます。
+sessionディレクトリに空のstop.txtファイルを作成すれば計算が途中で止まるように細工しておきます。
+
+```python
+for v in range(10,21):
+  if not os.path.exists(w2k.case_path + 'stop.txt'):
+    v = v / 2
+    w2k.rkmax = v
+    w2k.lmax = 10
+    w2k.kmesh = 10000
+    w2k.gmax = 12
+```
+
+#### イニシャライズ・SCF計算の実行
+まず、これまでのSCFデータを消すために.scfファイルと.broydファイルを消しておきます。
+`w2k.init_lapw()`でイニシャライズし、`w2k.run_scf()`でSCF計算を行います。  
+SCF計算が終わったら`etot = w2k.get_etot()`によって.scfファイルからEtotを読み出し、リストに格納します。
+`datetime`パッケージを用いてSCF計算時間を取得しています。
+
+```python
+    sp.run('rm *.scf*', shell=True)
+    sp.run('rm *.broyd*', shell=True)
+    w2k.init_lapw()
+    dt_s = dt.datetime.now()
+    w2k.run_scf()
+    scf_time = dt.datetime.now() - dt_s
+    etot = w2k.get_etot()
+    etot_ls.append(etot)
+    scf_time_ls.append(scf_time)
+```
+
+#### DOS計算
+`w2k.run_dos(outputdpath, name)`によってDOS計算、計算結果の保存が行われます。
+ファイル名に`.`が入ると不安なので、`.replace('.', 'p')`によって無害な文字に置換します。
+
+```python
+    dosname = 'dos' + str(v).replace('.', 'p')
+    scfname = 'scf' + str(v).replace('.', 'p')
+    w2k.run_dos(dosout, dosname)
+```
+
+#### データの保存
+
+`etot_ls`, `scf_time_ls`を.npy形式で保存します。
+同時に、.dos1evupなどのファイルはigorで読み込むときに苦労するので、analyze_w2k.pyの機能`make_dos_waves`を使って.itxファイルに変換します。
+
+```python
+    np.save(scfout + 'etot.npy', np.array(etot_ls))
+    np.save(scfout + 'scf_time.npy', np.array(scf_time_ls))
+    an.make_dos_waves([dosout])
+```
+
+#### コード全体
+
+```python
+import run_w2k
+import os
+import datetime as dt
+import subprocess as sp
+import analyze_w2k as an
+import numpy as np
+
+session = 'Co2MnGa'
+w2k = run_w2k.W2k(session)
+w2k.set_parallel(4)
+
+etot_ls = []
+scf_time_ls = []
+convdir = w2k.case_path + 'conv/rkmax/'
+dosout = convdir + 'dos/'
+scfout = convdir + 'scf/'
+os.makedirs(dosout, exist_ok=True)
+os.makedirs(scfout, exist_ok=True)
+
+for v in range(10,21):
+  if not os.path.exists(w2k.case_path + 'stop.txt'):
+    v = v / 2
+    w2k.rkmax = v
+    w2k.lmax = 10
+    w2k.kmesh = 10000
+    w2k.gmax = 12
+
+    sp.run('rm *.scf*', shell=True)
+    sp.run('rm *.broyd*', shell=True)
+    w2k.init_lapw()
+    dt_s = dt.datetime.now()
+    w2k.run_scf()
+    scf_time = dt.datetime.now() - dt_s
+    etot = w2k.get_etot()
+    etot_ls.append(etot)
+    scf_time_ls.append(scf_time)
+
+    dosname = 'dos' + str(v).replace('.', 'p')
+    scfname = 'scf' + str(v).replace('.', 'p')
+    w2k.run_dos(dosout, dosname)
+
+    sp.run(['cp', w2k.filepath('.scf'), scfout + scfname + '.scf'])
+
+    np.save(scfout + 'etot.npy', np.array(etot_ls))
+    np.save(scfout + 'scf_time.npy', np.array(scf_time_ls))
+    an.make_dos_waves([dosout])
 ```
