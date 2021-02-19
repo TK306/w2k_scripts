@@ -106,6 +106,7 @@ class W2k:
 			f.write(s)
 
 	def init_lapw(self):  # run initialize calculation
+		os.chdir(self.case_path)
 		init_run = ['init_lapw', '-b', '-vxc', '13', '-ecut', '-6.0', '-rkmax', str(self.rkmax), '-numk', str(self.kmesh)]
 
 		if self.spol:
