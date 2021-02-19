@@ -1,3 +1,4 @@
+# 概要
 WIEN2k第一原理プログラムによるバンド計算を行うスクリプトです。
 * run_w2k.py
 * make_klist_band.py
@@ -47,14 +48,14 @@ import make_klist_band
 make_klist_band.main(output_name='example.klist_band', kmeshx=100, kpath=[[0, 0, 0], [1, 0, 0], [0.75, 0.75, 0]], index_ls=['Gamma', 'X', 'K'], d=0, echo=1)
 ```
 
-| 変数名           | 説明               | 型                     |
-|---------------|------------------|-----------------------|
-| `output_name` | 出力ファイルのフルパス      | `str`                 |
-| `kmeshx`      | k点数              | `int`                 |
-| `kpath`       | kpath            | `float`の`list`の`list` |
-| `index_ls`    | kpathに対応するインデックス | `str`の`list`          |
-| `d`           | 最大値（0で自動設定）      | `int`                 |
-| `echo`        | ログの出力フラグ         | `int`                 |
+| name          | description      | type                  | default | required |
+|---------------|------------------|-----------------------|---------|----------|
+| `output_name` | 出力ファイルのフルパス      | `str`                 |         | true     |
+| `kmeshx`      | k点数              | `int`                 |         | true     |
+| `kpath`       | kpath            | `float`の`list`の`list` |         | true     |
+| `index_ls`    | kpathに対応するインデックス | `str`の`list`          | []      |          |
+| `d`           | 最大値（0で自動設定）      | `int`                 | 0       |          |
+| `echo`        | ログの出力フラグ         | `int`                 | 1       |          |
 
 ### `sonomama`モードを用いたARPES測定の等エネルギー曲線を再現するklistの作成
 
@@ -96,12 +97,12 @@ for th in list(np.linespace(th_s, th_e, th_n)):
 make_klist_band.sonomama(output_name='example.klist_band', kpath=kpath_list, d=d, echo=0)
 ```
 
-| 変数名           | 説明          | 型                     |
-|---------------|-------------|-----------------------|
-| `output_name` | 出力ファイルのフルパス | `str`                 |
-| `kpath`       | kpath       | `float`の`list`の`list` |
-| `d`           | 最大値         | `int`                 |
-| `echo`        | ログの出力フラグ    | `int`                 |
+| name          | description | type                  | default | required |
+|---------------|-------------|-----------------------|---------|----------|
+| `output_name` | 出力ファイルのフルパス | `str`                 |         | true     |
+| `kpath`       | kpath       | `float`の`list`の`list` |         | true     |
+| `d`           | 最大値         | `int`                 |         | true     |
+| `echo`        | ログの出力フラグ    | `int`                 | 0       |          |
 
 # analyze_w2k.py
 .dosxevファイルや.agrファイルを読み込むコードです。
