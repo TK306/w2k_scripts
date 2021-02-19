@@ -24,6 +24,8 @@ WIEN2k第一原理プログラムによるバンド計算を行うスクリプ�
 
 # run_w2k.py
 WIEN2k wrapper的なコードです。
+## Requirements
+
 
 ## 準備
 環境に合わせて、以下の`self.temp_path`及び`self.w2k_user`の初期値を変更してください。
