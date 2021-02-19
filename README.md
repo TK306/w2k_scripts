@@ -1,5 +1,5 @@
 # 概要
-WIEN2k第一原理プログラムによるバンド計算を行うスクリプトです。
+WIEN2k第一原理計算プログラムによるバンド計算を行うスクリプトです。
 * run_w2k.py
 * make_klist_band.py
 * analyze_w2k.py
