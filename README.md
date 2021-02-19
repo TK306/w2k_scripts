@@ -38,6 +38,26 @@ class W2k:
 ...
 ```
 
+## クラス変数
+| name        | description      | type         | default                 |
+|-------------|------------------|--------------|-------------------------|
+| `case`      | セッション名           | `str`        | クラス読み込み時に設定             |
+| `temp_path` | テンプレートファイルのパス    | `str`        | 環境に合わせてソースをいじって設定してください |
+| `w2k_user`  |                  | `str`        | 環境に合わせてソースをいじって設定してください |
+| `case_path` |                  | `str`        | 環境に合わせてソースをいじって設定してください |
+| `so`        | スピン軌道相互作用フラグ     | `int`        |                         |
+| `orb`       | +U計算フラグ          | `int`        |                         |
+| `spol`      | スピン偏極計算フラグ       | `int`        |                         |
+| `spin_ls`   | スピンのリスト          | `str`の`list` | `['up', 'dn']`          |
+| `parallel`  | 並列計算のスレッド数       | `int`        | `1`                     |
+| `rkmax`     | RKmax            | `int`        | `7`                     |
+| `lmax`      | lmax             | `int`        | `10`                    |
+| `gmax`      | Gmax             | `int`        | `12`                    |
+| `kmesh`     | SCF計算及びDOS計算のk点数 | `int`        | `1000`                  |
+| `scf_ec`    | SCF計算のエネルギー収束条件  | `float`      | `0.0001`                |
+| `scf_cc`    | SCF計算のチャージ収束条件   | `float`      | `None`                  |
+| `ni`        | SCF計算の-NIオプション   | `int`        | `1`                     |
+
 # make_klist_band.py
 .klist_bandファイルを作成するコードです。  
 XCrysdenみたいに波数点を何個か指定し、総点数を与えることでklistを作るモード`main`と、全く補完を行わないモード`sonomama`が存在します。
