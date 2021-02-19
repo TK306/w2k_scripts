@@ -256,7 +256,7 @@ class W2k:
 				path = self.filepath('.dos' + str(n) + 'eV' + spin)
 				savepath = outfol + name + '.dos' + str(n) + 'eV' + spin
 				if os.path.exists(path):
-					subprocess.call(["cp", path, savepath])
+					subprocess.call(["", path, savepath])
 				else:
 					break
 				n += 1
