@@ -31,18 +31,68 @@ class W2k:
 ## make_klist_band.py
 .klist_bandファイルを作成するコードです。  
 XCrysdenみたいに波数点を何個か指定し、総点数を与えることでklistを作るモード`main`と、全く補完を行わないモード`sonomama`が存在します。
-
 ### 使用例
-
+#### `main`モードを用いたG--X--K(fcc)を通るklistの作成
 ```python
 import make_klist_band
 make_klist_band.main(output_name='example.klist_band', kmeshx=100, kpath=[[0, 0, 0], [1, 0, 0], [0.75, 0.75, 0]], index_ls=['Gamma', 'X', 'K'], d=0, echo=1)
 ```
 
+| 変数名           | 説明               | 型                     |
+|---------------|------------------|-----------------------|
+| `output_name` | 出力ファイルのフルパス      | `str`                 |
+| `kmeshx`      | k点数              | `int`                 |
+| `kpath`       | kpath            | `float`の`list`の`list` |
+| `index_ls`    | kpathに対応するインデックス | `str`の`list`          |
+| `d`           | 最大値（0で自動設定）      | `int`                 |
+| `echo`        | ログの出力フラグ         | `int`                 |
+
+#### `sonomama`モードを用いたARPES測定の等エネルギー曲線を再現するklistの作成
+
 ```python
 import make_klist_band
-make_klist_band.sonomama(output_name='example.klist_band', kpath=kpath_list, d=1000, echo=0)
+import numpy as np
+
+def kikakuka(v):
+  if v > 0:
+    v = -v
+  v = np.mod(v, 2)
+  if v > 1:
+    v = 2 - v
+  return v
+
+hn = 500
+V0 = 12.5
+W= 4.5
+a = 5.755
+th_s = -15
+th_e = 15
+th_n = 100
+mm = 0.5123
+
+ek = hn - W
+
+kpath_list = []
+d = 1000
+for th in list(np.linespace(th_s, th_e, th_n)):
+  kx = mm * np.sqrt(ek) * np.sin(th / 180 * np.pi)
+  ky = 0
+  kz = mm * np.sqrt(ek * np.cos(th / 180 * np.pi) ** 2 + V0)
+  
+  kx = kikakuka(kx / (2 * np.pi / a)) * d
+  ky = kikakuka(ky / (2 * np.pi / a)) * d
+  kz = kikakuka(kz / (2 * np.pi / a)) * d
+  kpath_list.append([kx, ky, kz])
+
+make_klist_band.sonomama(output_name='example.klist_band', kpath=kpath_list, d=d, echo=0)
 ```
+
+| 変数名           | 説明          | 型                     |
+|---------------|-------------|-----------------------|
+| `output_name` | 出力ファイルのフルパス | `str`                 |
+| `kpath`       | kpath       | `float`の`list`の`list` |
+| `d`           | 最大値         | `int`                 |
+| `echo`        | ログの出力フラグ    | `int`                 |
 
 ## 計算コードの例
 ### kx-ky等エネルギー面を計算するコード
@@ -57,7 +107,7 @@ import make_klist_band as kb
 
 必要なパッケージをインポートします。
 インストールされていない場合、`$pip install subprocess`などでインストールできます。
-詳しくは自分で調べることをおすすめします。
+インストール方法は環境に合わせて調査してください。
 
 ```python
 import subprocess as sp
