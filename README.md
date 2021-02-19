@@ -94,6 +94,9 @@ make_klist_band.sonomama(output_name='example.klist_band', kpath=kpath_list, d=d
 | `d`           | 最大値         | `int`                 |
 | `echo`        | ログの出力フラグ    | `int`                 |
 
+## analyze_w2k.py
+.dosxevファイルや.agrファイルを読み込むコードです。
+
 ## 計算コードの例
 ### kx-ky等エネルギー面を計算するコード
 run_w2k.py、make_klist_band.pyと同じ階層にexample.pyを作成します。
@@ -195,4 +198,39 @@ for ky in range(kyn):
   w2k.run_band(outputdpath, name)
   tn = dt.datetime.now() # optional
   print('FINISH : ' + str(tst + (tn - tst) / (ky + 1) * kyn)) # optional
+```
+
+### SCF計算自動化コード
+イニシャライズからSCF計算、Total EnergyやDOS計算を自動化することで、k-meshやRKmax等のパラメータに対する収束性を確認することができます。
+#### 色々インポート
+run_w2k.pyとmake_klist_band.pyをインポートします。
+
+```python
+import run_w2k
+import make_klist_band as kb
+import analyze_w2k as an
+```
+
+必要なパッケージをインポートします。
+`igorwriter`はndarrayを.ibwファイルや.itxファイルとして保存できるので、便利です。
+
+```python
+import subprocess as sp
+```
+
+#### クラスの呼び出し
+run_w2k.pyでは様々な機能・変数を一つのクラスにまとめています。
+`w2k = run_w2k.W2k(session)`としてクラスを呼び出した時点で、全ての変数が生成され、初期値が代入されています。
+
+`session`には、セッションのディレクトリの名前を文字列として入れてください。
+変数は`w2k.__init__`の中で初期値を設定しているので、適宜見に行ってください。
+
+```python
+session = 'Co2MnGa'
+w2k = run_w2k.W2k(session)
+w2k.spol = 1
+w2k.rkmax = 7
+w2k.kmesh = 1000
+w2k.lmax = 10
+w2k.gmax = 12
 ```
