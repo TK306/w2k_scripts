@@ -1,6 +1,5 @@
 import subprocess
 import numpy as np
-import datetime as dt
 import os
 
 # directory path string must finish with "/"
@@ -12,8 +11,6 @@ class W2k:
 		self.w2k_user = '/Users/kounotakashi/WIEN2k_17.1_user/'  # wien2k user folder path
 		self.case_path = self.w2k_user + self.case + '/'  # session path
 
-		self.qtl = 0  # qtl on: 1, off: 0
-		self.qtl_ls = [[1, 0]]  # [[Atom number, orb number], [Atom number, orb number], ...]
 		self.so = 0  # spin orbit on: 1, off: 0
 		self.orb = 0  # +U on: 1, off: 0
 		self.spol = 1  # spin polarized calculation on: 1, off: 0
@@ -26,7 +23,7 @@ class W2k:
 		self.kmesh = 10000
 
 		self.scf_ec = 0.0001  # energy convergence (Ry)
-		self.scf_cc = 0.001  # charge convergence (e)
+		self.scf_cc = None  # charge convergence (e)
 		self.ni = 1  # -NI option
 
 	def set_parallel(self, p):  # make .machines file
@@ -163,9 +160,12 @@ class W2k:
 		ni = self.ni
 
 		if spol:
-			run_l = ['runsp_lapw', '-ec', str(ec), '-cc', str(cc)]
+			run_l = ['runsp_lapw', '-ec', str(ec)]
 		else:
-			run_l = ['run_lapw', '-ec', str(ec), '-cc', str(cc)]
+			run_l = ['run_lapw', '-ec', str(ec)]
+			
+		if not cc == None:
+			run_l.append('-cc').append(str(cc))
 
 		if p > 1:
 			run_l.append('-p')
@@ -241,26 +241,32 @@ class W2k:
 			subprocess.run(run_tetra)
 
 		subprocess.call(["mkdir", "-p", outfol])
-
-		for s in range(spol + 1):
-			spin = self.spin_ls[s]
+		
+		if spol:
+			sp = len(self.spin_ls)
+		else:
+			sp = 1
+		for s in range(sp):
+			if spol:
+				spin = self.spin_ls[s]
+			else:
+				spin = ''
 			n = 1
 			while 1:
 				path = self.filepath('.dos' + str(n) + 'eV' + spin)
 				savepath = outfol + name + '.dos' + str(n) + 'eV' + spin
 				if os.path.exists(path):
-					subprocess.call(["cp", path, savepath])
+					subprocess.call(["", path, savepath])
 				else:
 					break
 				n += 1
 
-	def run_band(self, outfol, name, atom_ls: list = [''], orbital_ls: list = ['']):  # calculate band dispersion
+	def run_band(self, outfol, name, qtl = 0, qtl_ls = [[1, 0]], atom_ls = [''], orbital_ls = ['']):  # calculate band dispersion
 		os.chdir(self.case_path)
 
 		if not outfol.startswith(self.case_path):
 			outfol = self.case_path + outfol
 
-		qtl = self.qtl
 		so = self.so
 		orb = self.orb
 		spol = self.spol
@@ -320,18 +326,16 @@ class W2k:
 		subprocess.call(["mkdir", "-p", outfol])
 
 		if qtl == 0:
-			self.qtl_ls = [[0, 1]]
+			qtl_ls = [[0, 1]]
 
-		for q in self.qtl_ls:
+		for q in qtl_ls:
 			self.mod_insp_weight(q[0], q[1])
 			if spol:
 				run_spags = run_spag
-				run_spags = run_spag + ['-up']
-				print('run ' + ' '.join(run_spags) + ' / .insp : ' + ' '.join(str(v) for v in q))
-				subprocess.run(run_spags)
-				run_spags = run_spag + ['-dn']
-				print('run ' + ' '.join(run_spags) + ' / .insp : ' + ' '.join(str(v) for v in q))
-				subprocess.run(run_spags)
+				for spin in self.spin_ls:
+					run_spags = run_spag + [spin]
+					print('run ' + ' '.join(run_spags) + ' / .insp : ' + ' '.join(str(v) for v in q))
+					subprocess.run(run_spags)
 			else:
 				print('run ' + ' '.join(run_spag) + ' / .insp : ' + ' '.join(str(v) for v in q))
 				subprocess.run(run_spag)
@@ -354,7 +358,7 @@ class W2k:
 				if so:
 					subprocess.call(["cp", self.filepath(".bandsup.agr"), outfol + name + ".bands.agr"])
 				else:
-					subprocess.call(["cp", self.filepath(".bandsup.agr"), outfol + name + "up.bands.agr"])
-					subprocess.call(["cp", self.filepath(".bandsdn.agr"), outfol + name + "dn.bands.agr"])
+					for spin in self.spin_ls:
+						subprocess.call(["cp", self.filepath(".bandsup.agr"), outfol + name + spin + ".bands.agr"])
 			else:
 				subprocess.call(["cp", self.filepath(".bands.agr"), outfol + name + ".bands.agr"])

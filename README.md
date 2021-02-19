@@ -24,6 +24,10 @@ WIEN2k第一原理プログラムによるバンド計算を行うスクリプ�
 
 # run_w2k.py
 WIEN2k wrapper的なコードです。
+## Requirements
+* `numpy`
+* `subprocess`
+* `os`
 
 ## 準備
 環境に合わせて、以下の`self.temp_path`及び`self.w2k_user`の初期値を変更してください。
@@ -31,16 +35,58 @@ WIEN2k wrapper的なコードです。
 ```:run_w2k.py
 ...
 class W2k:
-	def __init__(self, case_g):
-		self.case = case_g  # session name
-		self.temp_path = '/usr/local/WIEN2k_17.1/SRC_templates/'  # template file path
-		self.w2k_user = '/Users/kounotakashi/WIEN2k_17.1_user/'  # wien2k user folder path
+  def __init__(self, case_g):
+    self.case = case_g  # session name
+    self.temp_path = '/usr/local/WIEN2k_17.1/SRC_templates/'  # template file path
+    self.w2k_user = '/Users/kounotakashi/WIEN2k_17.1_user/'  # wien2k user folder path
 ...
 ```
+
+## クラス変数
+| name        | description      | type         | default                 |
+|-------------|------------------|--------------|-------------------------|
+| `case`      | セッション名           | `str`        | クラス読み込み時に設定             |
+| `temp_path` | テンプレートファイルのパス    | `str`        | 環境に合わせてソースをいじって設定してください |
+| `w2k_user`  |                  | `str`        | 環境に合わせてソースをいじって設定してください |
+| `case_path` |                  | `str`        | 環境に合わせてソースをいじって設定してください |
+| `so`        | スピン軌道相互作用フラグ     | `int`        |                         |
+| `orb`       | +U計算フラグ          | `int`        |                         |
+| `spol`      | スピン偏極計算フラグ       | `int`        |                         |
+| `spin_ls`   | スピンのリスト          | `str`の`list` | `['up', 'dn']`          |
+| `parallel`  | 並列計算のスレッド数       | `int`        | `1`                     |
+| `rkmax`     | RKmax            | `int`        | `7`                     |
+| `lmax`      | lmax             | `int`        | `10`                    |
+| `gmax`      | Gmax             | `int`        | `12`                    |
+| `kmesh`     | SCF計算及びDOS計算のk点数 | `int`        | `1000`                  |
+| `scf_ec`    | SCF計算のエネルギー収束条件  | `float`      | `0.0001`                |
+| `scf_cc`    | SCF計算のチャージ収束条件   | `float`      | `None`                  |
+| `ni`        | SCF計算の-NIオプション   | `int`        | `1`                     |
+
+## クラス関数
+| name                                                                  | description                                                                         |
+|-----------------------------------------------------------------------|-------------------------------------------------------------------------------------|
+| `set_parallel(スレッド数: int)`                                            | .machinesファイルを作成する。                                                                 |
+| `print_parameters()`                                                  | クラス変数を`print`する。                                                                    |
+| `filepath(拡張子: str)`                                                  | `case_path`に存在する`セッション名.ext`ファイルのフルパスを出力する。                                         |
+| `cp_from_temp(拡張子: str)`                                              | `temp_path`変数に格納したフルパスに存在する`case.ext`ファイルを`case_path`へコピーする。その際、`セッション名.ext`に改名される。 |
+| `init_lapw()`                                                         | イニシャライズを行う。                                                                         |
+| `set_lmax()`                                                          | `.in1`ファイルにlmaxを書き込む。`init_lapw()`の後に行う。                                            |
+| `set_gmax()`                                                          | `.in2`ファイルにgmaxを書き込む。`init_lapw()`の後に行う。                                            |
+| `run_scf()`                                                           | SCF計算を行う。                                                                           |
+| `restore_lapw()`                                                      | restore_lapwを走らせる。                                                                  |
+| `get_etot()`                                                          | `.scf`ファイルからトータルエネルギーを取得し、出力する。                                                     |
+| `get_ef()`                                                            | `.scf`ファイルからフェルミエネルギーを取得し、出力する。                                                     |
+| `run_dos(出力ディレクトリフルパス, 出力の名前, [部分状態密度の指定])`                           | DOSを計算し、出力ディレクトリに保存する。                                                              |
+| `set_ef_insp()`                                                       | `.insp`ファイルにフェルミエネルギーを書き込む。                                                         |
+| `mod_insp_weight(atom: int, orb: int)`                                | `.insp`ファイルに重み付けの原子番号、軌道番号を書き込む。                                                    |
+| `run_band(出力ディレクトリフルパス, 出力の名前, [重み付けフラグ, 重み付けリスト, 原子名称リスト, 軌道名称リスト])` | バンド計算し、出力ディレクトリに保存する。重み付け計算の場合、重み付けリスト`[[atom, orb], [atom, orb], ...]`を指定する。       |
 
 # make_klist_band.py
 .klist_bandファイルを作成するコードです。  
 XCrysdenみたいに波数点を何個か指定し、総点数を与えることでklistを作るモード`main`と、全く補完を行わないモード`sonomama`が存在します。
+## Requirements
+* `numpy`
+
 ## 使用例
 ### `main`モードを用いたG--X--K(fcc)を通るklistの作成
 ```python
@@ -53,9 +99,9 @@ make_klist_band.main(output_name='example.klist_band', kmeshx=100, kpath=[[0, 0,
 | `output_name` | 出力ファイルのフルパス      | `str`                 |         | true     |
 | `kmeshx`      | k点数              | `int`                 |         | true     |
 | `kpath`       | kpath            | `float`の`list`の`list` |         | true     |
-| `index_ls`    | kpathに対応するインデックス | `str`の`list`          | []      |          |
-| `d`           | 最大値（0で自動設定）      | `int`                 | 0       |          |
-| `echo`        | ログの出力フラグ         | `int`                 | 1       |          |
+| `index_ls`    | kpathに対応するインデックス | `str`の`list`          | `[]`   |          |
+| `d`           | 最大値（0で自動設定）      | `int`                 | `0`     |          |
+| `echo`        | ログの出力フラグ         | `int`                 | `1`       |          |
 
 ### `sonomama`モードを用いたARPES測定の等エネルギー曲線を再現するklistの作成
 
@@ -89,9 +135,9 @@ for th in list(np.linespace(th_s, th_e, th_n)):
   ky = 0
   kz = mm * np.sqrt(ek * np.cos(th / 180 * np.pi) ** 2 + V0)
   
-  kx = kikakuka(kx / (2 * np.pi / a)) * d
-  ky = kikakuka(ky / (2 * np.pi / a)) * d
-  kz = kikakuka(kz / (2 * np.pi / a)) * d
+  kx = kikakuka(kx / (2 * np.pi / a))
+  ky = kikakuka(ky / (2 * np.pi / a))
+  kz = kikakuka(kz / (2 * np.pi / a))
   kpath_list.append([kx, ky, kz])
 
 make_klist_band.sonomama(output_name='example.klist_band', kpath=kpath_list, d=d, echo=0)
@@ -102,11 +148,14 @@ make_klist_band.sonomama(output_name='example.klist_band', kpath=kpath_list, d=d
 | `output_name` | 出力ファイルのフルパス | `str`                 |         | true     |
 | `kpath`       | kpath       | `float`の`list`の`list` |         | true     |
 | `d`           | 最大値         | `int`                 |         | true     |
-| `echo`        | ログの出力フラグ    | `int`                 | 0       |          |
+| `echo`        | ログの出力フラグ    | `int`                 | `0`       |          |
 
 # analyze_w2k.py
 .dosxevファイルや.agrファイルを読み込むコードです。
-
+## Requirements
+* `subprocess`
+* `os`
+* `igorwriter`
 # 計算コードの例
 ## kx-ky等エネルギー面を計算するコード
 run_w2k.py、make_klist_band.pyと同じ階層にexample.pyを作成します。
@@ -161,14 +210,13 @@ sp.run(['mkdir', '-p', outputdpath])
 今回ky, kxをそれぞれ101点計算することにしています。
 
 インポートしたmake_klist_band.pyの中の`main`関数を使います。
-ラベルをつける必要は無いので、`index_ls`は`[]`にしておけば良いです。
 
 ```python
 kxn = 101
 kyn = 101
 
 for ky in range(kyn):
-  kb.main(w2k.filepath('.klist_band'), kxn, [[0, ky / (kyn - 1), 0], [1, ky / (kyn - 1), 0]], [])
+  kb.main(w2k.filepath('.klist_band'), kxn, [[0, ky / (kyn - 1), 0], [1, ky / (kyn - 1), 0]])
 ```
 
 ### 計算の実行
@@ -231,7 +279,7 @@ import igorwriter as iw
 ```
 
 ### クラスの呼び出し
-`w2k.set_parallel(p)`によって、.machinesファイルを作成・編集し並列計算の準備を行います。  
+`w2k.set_parallel(スレッド数)`によって、.machinesファイルを作成・編集し並列計算の準備を行います。  
 単純なk点並列のみに対応しています。
 
 ```python
@@ -258,7 +306,7 @@ os.makedirs(scfout, exist_ok=True)
 sessionディレクトリに空のstop.txtファイルを作成すれば計算が途中で止まるように細工しておきます。
 
 ```python
-for v in range(10,21):
+for v in range(10, 21):
   if not os.path.exists(w2k.case_path + 'stop.txt'):
     v = v / 2
     w2k.rkmax = v

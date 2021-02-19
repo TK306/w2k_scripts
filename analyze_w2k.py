@@ -1,7 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import subprocess as sp
-import datetime as dt
 from igorwriter import IgorWave
 import os
 
