@@ -25,7 +25,9 @@ WIEN2k第一原理プログラムによるバンド計算を行うスクリプ�
 # run_w2k.py
 WIEN2k wrapper的なコードです。
 ## Requirements
-
+* `numpy`
+* `subprocess`
+* `os`
 
 ## 準備
 環境に合わせて、以下の`self.temp_path`及び`self.w2k_user`の初期値を変更してください。
@@ -63,6 +65,11 @@ class W2k:
 # make_klist_band.py
 .klist_bandファイルを作成するコードです。  
 XCrysdenみたいに波数点を何個か指定し、総点数を与えることでklistを作るモード`main`と、全く補完を行わないモード`sonomama`が存在します。
+## Requirements
+* `numpy`
+* `subprocess`
+* `os`
+* `igorwriter`
 ## 使用例
 ### `main`モードを用いたG--X--K(fcc)を通るklistの作成
 ```python
@@ -128,7 +135,8 @@ make_klist_band.sonomama(output_name='example.klist_band', kpath=kpath_list, d=d
 
 # analyze_w2k.py
 .dosxevファイルや.agrファイルを読み込むコードです。
-
+## Requirements
+* `numpy`
 # 計算コードの例
 ## kx-ky等エネルギー面を計算するコード
 run_w2k.py、make_klist_band.pyと同じ階層にexample.pyを作成します。
