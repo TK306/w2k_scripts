@@ -13,7 +13,6 @@ class W2k:
 		self.case_path = self.w2k_user + self.case + '/'  # session path
 
 		self.qtl = 0  # qtl on: 1, off: 0
-		self.qtl_ls = [[1, 0]]  # [[Atom number, orb number], [Atom number, orb number], ...]
 		self.so = 0  # spin orbit on: 1, off: 0
 		self.orb = 0  # +U on: 1, off: 0
 		self.spol = 1  # spin polarized calculation on: 1, off: 0
@@ -261,7 +260,7 @@ class W2k:
 					break
 				n += 1
 
-	def run_band(self, outfol, name, atom_ls: list = [''], orbital_ls: list = ['']):  # calculate band dispersion
+	def run_band(self, outfol, name, qtl_ls = [[1, 0]], atom_ls = [''], orbital_ls = ['']):  # calculate band dispersion
 		os.chdir(self.case_path)
 
 		if not outfol.startswith(self.case_path):
@@ -327,9 +326,9 @@ class W2k:
 		subprocess.call(["mkdir", "-p", outfol])
 
 		if qtl == 0:
-			self.qtl_ls = [[0, 1]]
+			qtl_ls = [[0, 1]]
 
-		for q in self.qtl_ls:
+		for q in qtl_ls:
 			self.mod_insp_weight(q[0], q[1])
 			if spol:
 				run_spags = run_spag
