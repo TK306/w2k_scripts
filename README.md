@@ -33,7 +33,7 @@ class W2k:
 
 ```:example.py
 import run_w2k
-import make_klist_bands as kb
+import make_klist_band as kb
 import subprocess as sp
 import datetime as dt # optional
 
@@ -57,5 +57,5 @@ for ky in range(kyn):
   name = 'ky_' + str(ky)
   w2k.run_band(outputdpath, name)
   tn = dt.datetime.now() # optional
-  print('FINISH : ' + str((tn - tst) / (ky + 1) * kyn)) # optional
+  print('FINISH : ' + str(tst + (tn - tst) / (ky + 1) * kyn)) # optional
 ```
