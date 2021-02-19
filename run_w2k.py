@@ -333,7 +333,7 @@ class W2k:
 			if spol:
 				run_spags = run_spag
 				for spin in self.spin_ls:
-					run_spags = run_spag + [spin]
+					run_spags = run_spag + ['-' + spin]
 					print('run ' + ' '.join(run_spags) + ' / .insp : ' + ' '.join(str(v) for v in q))
 					subprocess.run(run_spags)
 			else:

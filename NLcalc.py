@@ -10,7 +10,8 @@ import os
 w2k = run_w2k.W2k('Co2MnGa')
 w2k.parallel = 1
 w2k.set_parallel(w2k.parallel)
-w2k.spol = 0
+w2k.spol = 1
+w2k.spin_ls = ['up']
 w2k.print_parameters()
 
 
