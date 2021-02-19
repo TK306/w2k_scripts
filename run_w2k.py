@@ -241,9 +241,16 @@ class W2k:
 			subprocess.run(run_tetra)
 
 		subprocess.call(["mkdir", "-p", outfol])
-
-		for s in range(spol + 1):
-			spin = self.spin_ls[s]
+		
+		if spol:
+			sp = len(self.spin_ls)
+		else:
+			sp = 1
+		for s in range(sp):
+			if spol:
+				spin = self.spin_ls[s]
+			else:
+				spin = ''
 			n = 1
 			while 1:
 				path = self.filepath('.dos' + str(n) + 'eV' + spin)
@@ -326,12 +333,10 @@ class W2k:
 			self.mod_insp_weight(q[0], q[1])
 			if spol:
 				run_spags = run_spag
-				run_spags = run_spag + ['-up']
-				print('run ' + ' '.join(run_spags) + ' / .insp : ' + ' '.join(str(v) for v in q))
-				subprocess.run(run_spags)
-				run_spags = run_spag + ['-dn']
-				print('run ' + ' '.join(run_spags) + ' / .insp : ' + ' '.join(str(v) for v in q))
-				subprocess.run(run_spags)
+				for spin in self.spin_ls:
+					run_spags = run_spag + [spin]
+					print('run ' + ' '.join(run_spags) + ' / .insp : ' + ' '.join(str(v) for v in q))
+					subprocess.run(run_spags)
 			else:
 				print('run ' + ' '.join(run_spag) + ' / .insp : ' + ' '.join(str(v) for v in q))
 				subprocess.run(run_spag)
@@ -354,7 +359,7 @@ class W2k:
 				if so:
 					subprocess.call(["cp", self.filepath(".bandsup.agr"), outfol + name + ".bands.agr"])
 				else:
-					subprocess.call(["cp", self.filepath(".bandsup.agr"), outfol + name + "up.bands.agr"])
-					subprocess.call(["cp", self.filepath(".bandsdn.agr"), outfol + name + "dn.bands.agr"])
+					for spin in self.spin_ls:
+						subprocess.call(["cp", self.filepath(".bandsup.agr"), outfol + name + spin + ".bands.agr"])
 			else:
 				subprocess.call(["cp", self.filepath(".bands.agr"), outfol + name + ".bands.agr"])
