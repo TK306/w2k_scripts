@@ -24,7 +24,7 @@ class W2k:
 		self.kmesh = 10000
 
 		self.scf_ec = 0.0001  # energy convergence (Ry)
-		self.scf_cc = 0.001  # charge convergence (e)
+		self.scf_cc = None  # charge convergence (e)
 		self.ni = 1  # -NI option
 
 	def set_parallel(self, p):  # make .machines file
@@ -161,9 +161,12 @@ class W2k:
 		ni = self.ni
 
 		if spol:
-			run_l = ['runsp_lapw', '-ec', str(ec), '-cc', str(cc)]
+			run_l = ['runsp_lapw', '-ec', str(ec)]
 		else:
-			run_l = ['run_lapw', '-ec', str(ec), '-cc', str(cc)]
+			run_l = ['run_lapw', '-ec', str(ec)]
+			
+		if not cc == None:
+			run_l.append('-cc').append(str(cc))
 
 		if p > 1:
 			run_l.append('-p')
