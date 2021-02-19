@@ -89,7 +89,7 @@ w2k.set_ef_insp()
 バンド計算結果.bands.agrファイルを出力するディレクトリを作成します。
 クラス変数`w2k.case_path`にセッションディレクトリのフルパスが入っているので、これを利用します。
 
-```
+```python
 outputdpath = w2k.case_path + 'kxkymap/'
 sp.run(['mkdir', '-p', outputdpath])
 ```
@@ -100,7 +100,7 @@ sp.run(['mkdir', '-p', outputdpath])
 インポートしたmake_klist_band.pyの中の`main`関数を使います。
 ラベルをつける必要は無いので、`index_ls`は`[]`にしておけば良いです。
 
-```
+```python
 kxn = 101
 kyn = 101
 
@@ -111,7 +111,7 @@ for ky in range(kyn):
 #### 計算の実行
 出力ファイル名を'name'に格納（拡張子は不要）し、出力ディレクトリのフルパス`outputdpath`を指定し計算を実行します。
 
-```
+```python
   name = 'ky_' + str(ky)
   w2k.run_band(outputdpath, name)
 ```
