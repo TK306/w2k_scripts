@@ -28,7 +28,23 @@ class W2k:
 ...
 ```
 
-## 使用例
+## make_klist_band.py
+.klist_bandファイルを作成するコードです。  
+XCrysdenみたいに波数点を何個か指定し、総点数を与えることでklistを作るモード`main`と、全く補完を行わないモード`sonomama`が存在します。
+
+### 使用例
+
+```python
+import make_klist_band
+make_klist_band.main(output_name='example.klist_band', kmeshx=100, kpath=[[0, 0, 0], [1, 0, 0], [0.75, 0.75, 0]], index_ls=['Gamma', 'X', 'K'], d=0, echo=1)
+```
+
+```python
+import make_klist_band
+make_klist_band.sonomama(output_name='example.klist_band', kpath=kpath_list, d=1000, echo=0)
+```
+
+## 計算コードの例
 ### kx-ky等エネルギー面を101 x 101点計算するコード
 run_w2k.py、make_klist_band.pyと同じ階層にexample.pyを作成します。
 #### 色々インポート
