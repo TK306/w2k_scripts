@@ -124,7 +124,7 @@ def kikakuka(v):
 
 hn = 500
 V0 = 12.5
-W= 4.5
+W = 4.5
 a = 5.755
 th_s = -15
 th_e = 15
