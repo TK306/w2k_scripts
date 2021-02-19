@@ -45,7 +45,7 @@ make_klist_band.sonomama(output_name='example.klist_band', kpath=kpath_list, d=1
 ```
 
 ## 計算コードの例
-### kx-ky等エネルギー面を101 x 101点計算するコード
+### kx-ky等エネルギー面を計算するコード
 run_w2k.py、make_klist_band.pyと同じ階層にexample.pyを作成します。
 #### 色々インポート
 run_w2k.pyとmake_klist_band.pyをインポートします。
