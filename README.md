@@ -45,7 +45,6 @@ import make_klist_band as kb
 
 ```python
 import subprocess as sp
-import datetime as dt # optional
 ```
 
 #### クラスの呼び出し
@@ -63,7 +62,7 @@ w2k.spin_ls = ['up', 'dn']
 ```
 
 #### .inspファイルの作成
-.inspファイルにSCF計算で出力されるフェルミ準位を入れるコードです。
+.inspファイルにSCF計算で出力されるフェルミ準位を入れます。
 .inspファイルをSRC_templateからコピーし、`0.xxx`の部分を.scfファイルから読み取ったフェルミエネルギーで置換しています。
 
 ```python
@@ -77,6 +76,28 @@ w2k.set_ef_insp()
 ```
 outputdpath = w2k.case_path + 'kxkymap/'
 sp.run(['mkdir', '-p', outputdpath])
+```
+
+#### .klist_bandファイルの作成
+今回ky, kxをそれぞれ101点計算することにしています。
+
+インポートしたmake_klist_band.pyの中の`main`関数を使います。
+ラベルをつける必要は無いので、`index_ls`は`[]`にしておけば良いです。
+
+```
+kxn = 101
+kyn = 101
+
+for ky in range(kyn):
+  kb.main(w2k.filepath('.klist_band'), kxn, [[0, ky / (kyn - 1), 0], [1, ky / (kyn - 1), 0]], [])
+```
+
+#### 計算の実行
+出力ファイル名を'name'に格納（拡張子は不要）し、出力ディレクトリのフルパス`outputdpath`を指定し計算を実行します。
+
+```
+  name = 'ky_' + str(ky)
+  w2k.run_band(outputdpath, name)
 ```
 
 #### コード全体
@@ -103,7 +124,7 @@ kyn = 101
 tst = dt.datetime.now() # optional
 
 for ky in range(kyn):
-  kb.main(w2k.filepath('.klist_band'), kxn, [[0, ky / 100, 0], [1, ky / 100, 0]], [])
+  kb.main(w2k.filepath('.klist_band'), kxn, [[0, ky / (kyn - 1), 0], [1, ky / (kyn - 1), 0]], [])
   name = 'ky_' + str(ky)
   w2k.run_band(outputdpath, name)
   tn = dt.datetime.now() # optional
