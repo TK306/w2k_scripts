@@ -89,9 +89,9 @@ for th in list(np.linespace(th_s, th_e, th_n)):
   ky = 0
   kz = mm * np.sqrt(ek * np.cos(th / 180 * np.pi) ** 2 + V0)
   
-  kx = kikakuka(kx / (2 * np.pi / a)) * d
-  ky = kikakuka(ky / (2 * np.pi / a)) * d
-  kz = kikakuka(kz / (2 * np.pi / a)) * d
+  kx = kikakuka(kx / (2 * np.pi / a))
+  ky = kikakuka(ky / (2 * np.pi / a))
+  kz = kikakuka(kz / (2 * np.pi / a))
   kpath_list.append([kx, ky, kz])
 
 make_klist_band.sonomama(output_name='example.klist_band', kpath=kpath_list, d=d, echo=0)
@@ -161,14 +161,13 @@ sp.run(['mkdir', '-p', outputdpath])
 今回ky, kxをそれぞれ101点計算することにしています。
 
 インポートしたmake_klist_band.pyの中の`main`関数を使います。
-ラベルをつける必要は無いので、`index_ls`は`[]`にしておけば良いです。
 
 ```python
 kxn = 101
 kyn = 101
 
 for ky in range(kyn):
-  kb.main(w2k.filepath('.klist_band'), kxn, [[0, ky / (kyn - 1), 0], [1, ky / (kyn - 1), 0]], [])
+  kb.main(w2k.filepath('.klist_band'), kxn, [[0, ky / (kyn - 1), 0], [1, ky / (kyn - 1), 0]])
 ```
 
 ### 計算の実行
@@ -231,7 +230,7 @@ import igorwriter as iw
 ```
 
 ### クラスの呼び出し
-`w2k.set_parallel(p)`によって、.machinesファイルを作成・編集し並列計算の準備を行います。  
+`w2k.set_parallel(スレッド数)`によって、.machinesファイルを作成・編集し並列計算の準備を行います。  
 単純なk点並列のみに対応しています。
 
 ```python
@@ -258,7 +257,7 @@ os.makedirs(scfout, exist_ok=True)
 sessionディレクトリに空のstop.txtファイルを作成すれば計算が途中で止まるように細工しておきます。
 
 ```python
-for v in range(10,21):
+for v in range(10, 21):
   if not os.path.exists(w2k.case_path + 'stop.txt'):
     v = v / 2
     w2k.rkmax = v
