@@ -1,6 +1,5 @@
 import subprocess
 import numpy as np
-import datetime as dt
 import os
 
 # directory path string must finish with "/"
