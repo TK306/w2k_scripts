@@ -31,10 +31,10 @@ WIEN2k wrapper的なコードです。
 ```:run_w2k.py
 ...
 class W2k:
-	def __init__(self, case_g):
-		self.case = case_g  # session name
-		self.temp_path = '/usr/local/WIEN2k_17.1/SRC_templates/'  # template file path
-		self.w2k_user = '/Users/kounotakashi/WIEN2k_17.1_user/'  # wien2k user folder path
+  def __init__(self, case_g):
+    self.case = case_g  # session name
+    self.temp_path = '/usr/local/WIEN2k_17.1/SRC_templates/'  # template file path
+    self.w2k_user = '/Users/kounotakashi/WIEN2k_17.1_user/'  # wien2k user folder path
 ...
 ```
 
