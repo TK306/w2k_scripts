@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def main(output_name: str, kmeshx: int, kpath: list, index_ls: list, d: int = 0, echo: int = 1):
+def main(output_name: str, kmeshx: int, kpath: list, index_ls: list = [], d: int = 0, echo: int = 1):
 	kplen = []
 
 	for kpi in range(len(kpath) - 1):
