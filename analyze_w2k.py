@@ -4,7 +4,6 @@ import subprocess as sp
 import datetime as dt
 from igorwriter import IgorWave
 import os
-import run_w2k
 
 
 def load_agr(path):  # output: ndarray energy(band,kx), weight(band,kx)
