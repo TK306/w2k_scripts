@@ -172,7 +172,7 @@ make_klist_band.sonomama(output_name='example.klist_band', kpath=kpath_list, d=d
 <h1 id="example">計算コードの例</h1>
 
 ## mapping.py
-kx-ky等エネルギー面を計算するコード例です。計算実行関数`run()`と解析関数`anal()`を用意します。
+kx-ky等エネルギー面を計算するコード例です。計算実行関数`run()`と解析関数`anal()`を例として用意しています。
 
 run_w2k.py、make_klist_band.pyと同じ階層にmapping.pyを置き、`$python3 mapping.py`で動作します。
 
