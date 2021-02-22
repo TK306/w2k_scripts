@@ -278,7 +278,6 @@ run_w2k.pyとanalyze_w2k.pyをインポートします。
 
 ```python
 import run_w2k
-import make_klist_band as kb
 import analyze_w2k as an
 ```
 
@@ -286,6 +285,10 @@ import analyze_w2k as an
 `igorwriter`はndarrayを.ibwファイルや.itxファイルとして保存できるので、便利です。
 
 ```python
+import numpy as np
+import os
+import datetime as dt
+import subprocess as sp
 import igorwriter as iw
 ```
 
@@ -349,8 +352,9 @@ SCF計算が終わったら`etot = w2k.get_etot()`によって.scfファイル�
 ファイル名に`.`が入ると不安なので、`.replace('.', 'p')`によって無害な文字に置換します。
 
 ```python
-    dosname = 'dos' + str(v).replace('.', 'p')
-    scfname = 'scf' + str(v).replace('.', 'p')
+    vstr = str(v).replace('.', 'p')
+    dosname = 'dos' + vstr
+    scfname = 'scf' + vstr
     w2k.run_dos(dosout, dosname)
 ```
 
@@ -369,11 +373,12 @@ SCF計算が終わったら`etot = w2k.get_etot()`によって.scfファイル�
 
 ```python
 import run_w2k
+import analyze_w2k as an
+import numpy as np
 import os
 import datetime as dt
 import subprocess as sp
-import analyze_w2k as an
-import numpy as np
+import igorwriter as iw
 
 session = 'Co2MnGa'
 w2k = run_w2k.W2k(session)
@@ -386,10 +391,11 @@ dosout = convdir + 'dos/'
 scfout = convdir + 'scf/'
 os.makedirs(dosout, exist_ok=True)
 os.makedirs(scfout, exist_ok=True)
-
-for v in range(10,21):
+v_start = 5
+v_step = 0.5
+v_end = 11
+for v in np.arange(v_start, v_end + v_step / 2, v_step):
   if not os.path.exists(w2k.case_path + 'stop.txt'):
-    v = v / 2
     w2k.rkmax = v
     w2k.lmax = 10
     w2k.kmesh = 10000
@@ -411,7 +417,12 @@ for v in range(10,21):
 
     sp.run(['cp', w2k.filepath('.scf'), scfout + scfname + '.scf'])
 
-    np.save(scfout + 'etot.npy', np.array(etot_ls))
-    np.save(scfout + 'scf_time.npy', np.array(scf_time_ls))
+    etotw = iw.IgorWave(np.array(eto_ls), name='etot' + vstr)
+    scftw = iw.IgorWave(np.array(scf_time_ls), name='scftime' + vstr)
+    etotw.set_dimscale('x', v_start, v_step, '')
+    scftw.set_dimscale('x', v_start, v_step, '')
+    with open(convdir + 'scflog' + vstr + '.itx', 'w') as f:
+      etotw.save_itx(f)
+      scftw.save_itx(f)
     an.make_dos_waves([dosout])
 ```
