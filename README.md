@@ -347,7 +347,7 @@ SCF計算が終わったら`etot = w2k.get_etot()`によって.scfファイル�
     scf_time = dt.datetime.now() - dt_s
     etot = w2k.get_etot()
     etot_ls.append(etot)
-    scf_time_ls.append(scf_time)
+    scf_time_ls.append(scf_time.seconds)
 ```
 
 ### DOS計算
