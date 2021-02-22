@@ -320,9 +320,11 @@ os.makedirs(scfout, exist_ok=True)
 sessionディレクトリに空のstop.txtファイルを作成すれば計算が途中で止まるように細工しておきます。
 
 ```python
-for v in range(10, 21):
+v_start = 5
+v_step = 0.5
+v_end = 10
+for v in np.arange(v_start, v_end + v_step / 2, v_step):
   if not os.path.exists(w2k.case_path + 'stop.txt'):
-    v = v / 2
     w2k.rkmax = v
     w2k.lmax = 10
     w2k.kmesh = 10000
@@ -393,7 +395,7 @@ os.makedirs(dosout, exist_ok=True)
 os.makedirs(scfout, exist_ok=True)
 v_start = 5
 v_step = 0.5
-v_end = 11
+v_end = 10
 for v in np.arange(v_start, v_end + v_step / 2, v_step):
   if not os.path.exists(w2k.case_path + 'stop.txt'):
     w2k.rkmax = v
@@ -409,15 +411,16 @@ for v in np.arange(v_start, v_end + v_step / 2, v_step):
     scf_time = dt.datetime.now() - dt_s
     etot = w2k.get_etot()
     etot_ls.append(etot)
-    scf_time_ls.append(scf_time)
+    scf_time_ls.append(float(scf_time))
 
-    dosname = 'dos' + str(v).replace('.', 'p')
-    scfname = 'scf' + str(v).replace('.', 'p')
+    vstr = str(v).replace('.', 'p')
+    dosname = 'dos' + vstr
+    scfname = 'scf' + vstr
     w2k.run_dos(dosout, dosname)
 
     sp.run(['cp', w2k.filepath('.scf'), scfout + scfname + '.scf'])
 
-    etotw = iw.IgorWave(np.array(eto_ls), name='etot' + vstr)
+    etotw = iw.IgorWave(np.array(etot_ls), name='etot' + vstr)
     scftw = iw.IgorWave(np.array(scf_time_ls), name='scftime' + vstr)
     etotw.set_dimscale('x', v_start, v_step, '')
     scftw.set_dimscale('x', v_start, v_step, '')
