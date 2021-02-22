@@ -11,8 +11,8 @@
 * [analyze_w2k.py](#analyze_w2k)
   * Requirements
 * [計算コードの例](#example)
-  * kx-ky等エネルギー面を計算するコード
-  * SCF計算自動化コード
+  * mapping.py
+  * conv_check.py
 
 # 概要
 WIEN2k第一原理計算プログラムによるバンド計算を行うスクリプトです。
@@ -171,8 +171,9 @@ make_klist_band.sonomama(output_name='example.klist_band', kpath=kpath_list, d=d
 
 <h1 id="example">計算コードの例</h1>
 
-## kx-ky等エネルギー面を計算するコード
-run_w2k.py、make_klist_band.pyと同じ階層にexample.pyを作成します。
+## mapping.py
+kx-ky等エネルギー面を計算するコード例です。
+run_w2k.py、make_klist_band.pyと同じ階層にmapping.pyを作成します。
 ### 色々インポート
 run_w2k.pyとmake_klist_band.pyをインポートします。
 
@@ -272,7 +273,7 @@ for ky in range(kyn):
   print('FINISH : ' + str(tst + (tn - tst) / (ky + 1) * kyn)) # optional
 ```
 
-## SCF計算自動化コード
+## conv_check.py
 イニシャライズからSCF計算、Total EnergyやDOS計算を自動化することで、k-meshやRKmax等のパラメータに対する収束性を確認することができます。  
 例として、rkmaxを5から10まで0.5 stepで変化させながらEtotとDOSとSCF計算時間を取得するコードをつくります。
 ### 色々インポート
