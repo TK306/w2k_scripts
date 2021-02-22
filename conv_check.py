@@ -44,13 +44,13 @@ for v in np.arange(v_start, v_end + v_step / 2, v_step):
 
     sp.run(['cp', w2k.filepath('.scf'), scfout + scfname + '.scf'])
 
-    etotw = iw.IgorWave(np.array(etot_ls), name='etot' + vstr)
-    scftw = iw.IgorWave(np.array(scf_time_ls), name='scftime' + vstr)
+    etotw = iw.IgorWave(np.array(etot_ls), name='etot')
+    scftw = iw.IgorWave(np.array(scf_time_ls), name='scftime')
     etotw.set_dimscale('x', v_start, v_step, '')
     scftw.set_dimscale('x', v_start, v_step, '')
     etotw.set_datascale('eV')
     scftw.set_datascale('sec')
-    with open(convdir + 'scflog' + vstr + '.itx', 'w') as f:
+    with open(convdir + 'scflog.itx', 'w') as f:
       etotw.save_itx(f)
       scftw.save_itx(f)
     an.make_dos_waves([dosout])
