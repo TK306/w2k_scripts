@@ -104,7 +104,7 @@ class W2k:
 
 	def init_lapw(self):  # run initialize calculation
 		os.chdir(self.case_path)
-		init_run = ['init_lapw', '-b', '-vxc', '13', '-ecut', '-6.0', '-rkmax', str(self.rkmax), '-numk', str(self.kmesh)]
+		init_run = ['init_lapw', '-b', '-vxc', '13', '-ecut', '-6.0', '-rkmax', str(self.rkmax), '-numk', str(int(round(self.kmesh)))]
 
 		if self.spol:
 			init_run.insert(2, '-sp')
