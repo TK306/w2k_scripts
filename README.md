@@ -171,9 +171,12 @@ make_klist_band.sonomama(output_name='example.klist_band', kpath=kpath_list, d=d
 
 <h1 id="example">計算コードの例</h1>
 
-## mapping.py
-kx-ky等エネルギー面を計算するコード例です。
-run_w2k.py、make_klist_band.pyと同じ階層にmapping.pyを作成します。
+## [mapping.py](/mapping.py)
+kx-ky等エネルギー面を計算するコード例です。計算実行関数`run()`と解析関数`anal()`を用意します。
+
+run_w2k.py、make_klist_band.pyと同じ階層にmapping.pyを置き、`$python3 mapping.py`で動作します。
+
+以下では、スクリプトの中身について説明します。
 ### 色々インポート
 run_w2k.pyとmake_klist_band.pyをインポートします。
 
@@ -188,6 +191,7 @@ import make_klist_band as kb
 
 ```python
 import subprocess as sp
+
 ```
 
 ### クラスの呼び出し
@@ -242,38 +246,7 @@ for ky in range(kyn):
   w2k.run_band(outputdpath, name)
 ```
 
-### コード全体
-
-```:example.py
-import run_w2k
-import make_klist_band as kb
-import subprocess as sp
-import datetime as dt # optional
-
-session = 'Co2MnGa'
-w2k = run_w2k.W2k(session)
-w2k.spol = 1
-w2k.spin_ls = ['up', 'dn']
-
-w2k.set_ef_insp()
-
-outputdpath = w2k.case_path + 'kxkymap/'
-sp.run(['mkdir', '-p', outputdpath])
-
-kxn = 101
-kyn = 101
-
-tst = dt.datetime.now() # optional
-
-for ky in range(kyn):
-  kb.main(w2k.filepath('.klist_band'), kxn, [[0, ky / (kyn - 1), 0], [1, ky / (kyn - 1), 0]], [])
-  name = 'ky_' + str(ky)
-  w2k.run_band(outputdpath, name)
-  tn = dt.datetime.now() # optional
-  print('FINISH : ' + str(tst + (tn - tst) / (ky + 1) * kyn)) # optional
-```
-
-## conv_check.py
+## [conv_check.py](/conv_check.py)
 イニシャライズからSCF計算、Total EnergyやDOS計算を自動化することで、k-meshやRKmax等のパラメータに対する収束性を確認することができます。  
 例として、rkmaxを5から10まで0.5 stepで変化させながらEtotとDOSとSCF計算時間を取得するコードをつくります。
 ### 色々インポート
@@ -372,66 +345,5 @@ SCF計算が終わったら`etot = w2k.get_etot()`によって.scfファイル�
 ```python
     np.save(scfout + 'etot.npy', np.array(etot_ls))
     np.save(scfout + 'scf_time.npy', np.array(scf_time_ls))
-    an.make_dos_waves([dosout])
-```
-
-### コード全体
-
-```python
-import run_w2k
-import analyze_w2k as an
-import numpy as np
-import os
-import datetime as dt
-import subprocess as sp
-import igorwriter as iw
-
-session = 'Co2MnGa'
-w2k = run_w2k.W2k(session)
-w2k.set_parallel(4)
-
-etot_ls = []
-scf_time_ls = []
-convdir = w2k.case_path + 'conv/rkmax/'
-dosout = convdir + 'dos/'
-scfout = convdir + 'scf/'
-os.makedirs(dosout, exist_ok=True)
-os.makedirs(scfout, exist_ok=True)
-v_start = 5
-v_step = 0.5
-v_end = 10
-for v in np.arange(v_start, v_end + v_step / 2, v_step):
-  if not os.path.exists(w2k.case_path + 'stop.txt'):
-    w2k.rkmax = v
-    w2k.lmax = 10
-    w2k.kmesh = 10000
-    w2k.gmax = 12
-
-    sp.run('rm *.scf*', shell=True)
-    sp.run('rm *.broyd*', shell=True)
-    w2k.init_lapw()
-    dt_s = dt.datetime.now()
-    w2k.run_scf()
-    scf_time = dt.datetime.now() - dt_s
-    etot = w2k.get_etot()
-    etot_ls.append(etot)
-    scf_time_ls.append(scf_time.seconds)
-
-    vstr = str(v).replace('.', 'p')
-    dosname = 'dos' + vstr
-    scfname = 'scf' + vstr
-    w2k.run_dos(dosout, dosname)
-
-    sp.run(['cp', w2k.filepath('.scf'), scfout + scfname + '.scf'])
-
-    etotw = iw.IgorWave(np.array(etot_ls), name='etot' + vstr)
-    scftw = iw.IgorWave(np.array(scf_time_ls), name='scftime' + vstr)
-    etotw.set_dimscale('x', v_start, v_step, '')
-    scftw.set_dimscale('x', v_start, v_step, '')
-    etotw.set_datascale('eV')
-    scftw.set_datascale('sec')
-    with open(convdir + 'scflog' + vstr + '.itx', 'w') as f:
-      etotw.save_itx(f)
-      scftw.save_itx(f)
     an.make_dos_waves([dosout])
 ```
