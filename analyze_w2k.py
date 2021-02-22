@@ -76,16 +76,13 @@ def load_dos(path):
 	return dos
 
 
-def make_vox_vol(kx_p, ky_p, datafol, filename):
-	e_s = -2
-	e_e = 1
-	e_st = 0.01
+def make_vox_vol(e_s, e_e, e_st, kx_n, ky_n, datafol, filename):
 	e_n = int(round((e_e - e_s) / e_st) + 1)
 
-	volup = np.zeros((e_n, kx_p['Size'], ky_p['Size']))
-	voldn = np.zeros((e_n, kx_p['Size'], ky_p['Size']))
+	volup = np.zeros((e_n, kx_n, ky_n))
+	voldn = np.zeros((e_n, kx_n, ky_n))
 
-	for ky in range(ky_p['Size']):
+	for ky in range(ky_n):
 		for s in ['up', 'dn']:
 			datapath = datafol + filename + str(ky) + s + '.bands.agr'
 			agr, wei = load_agr(datapath)
@@ -94,10 +91,9 @@ def make_vox_vol(kx_p, ky_p, datafol, filename):
 					if (agr[band, kx] >= e_s and agr[band, kx] <= e_e):
 						ve = int(round((agr[band, kx] - e_s) / e_st))
 						if s == 'up':
-							volup[ve, kx, ky] = wei[band, kx] - 0.07
+							volup[ve, kx, ky] = 1
 						elif s == 'dn':
-							pass
-							voldn[ve, kx, ky] = wei[band, kx] - 0.07
+							voldn[ve, kx, ky] = 1
 
 	return volup, voldn, {'Offset': e_s, 'Delta': e_st, 'Size': e_n}
 
