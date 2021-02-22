@@ -171,12 +171,12 @@ make_klist_band.sonomama(output_name='example.klist_band', kpath=kpath_list, d=d
 
 <h1 id="example">計算コードの例</h1>
 
-## [mapping.py](/mapping.py)
+## mapping.py
 kx-ky等エネルギー面を計算するコード例です。計算実行関数`run()`と解析関数`anal()`を用意します。
 
 run_w2k.py、make_klist_band.pyと同じ階層にmapping.pyを置き、`$python3 mapping.py`で動作します。
 
-以下では、スクリプトの中身について説明します。
+以下では、スクリプトの特に`run()`の部分について説明します。
 ### 色々インポート
 run_w2k.pyとmake_klist_band.pyをインポートします。
 
@@ -246,7 +246,14 @@ for ky in range(kyn):
   w2k.run_band(outputdpath, name)
 ```
 
-## [conv_check.py](/conv_check.py)
+### 計算されたデータの解析
+`anal()`で.agrを読み込み、イゴールで直接読み込める.ibwファイルに変換しています。
+
+### コード全体
+
+[mapping.py](/mapping.py)
+
+## conv_check.py
 イニシャライズからSCF計算、Total EnergyやDOS計算を自動化することで、k-meshやRKmax等のパラメータに対する収束性を確認することができます。  
 例として、rkmaxを5から10まで0.5 stepで変化させながらEtotとDOSとSCF計算時間を取得するコードをつくります。
 ### 色々インポート
@@ -347,3 +354,7 @@ SCF計算が終わったら`etot = w2k.get_etot()`によって.scfファイル�
     np.save(scfout + 'scf_time.npy', np.array(scf_time_ls))
     an.make_dos_waves([dosout])
 ```
+
+### コード全体
+
+[conv_check.py](/conv_check.py)
