@@ -162,6 +162,7 @@ make_klist_band.sonomama(output_name='example.klist_band', kpath=kpath_list, d=d
 
 .dosxevファイルや.agrファイルを読み込むコードです。
 ## Requirements
+* `numpy`
 * `subprocess`
 * `os`
 * `igorwriter`
