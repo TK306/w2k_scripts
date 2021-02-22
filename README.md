@@ -412,7 +412,7 @@ for v in np.arange(v_start, v_end + v_step / 2, v_step):
     scf_time = dt.datetime.now() - dt_s
     etot = w2k.get_etot()
     etot_ls.append(etot)
-    scf_time_ls.append(float(scf_time))
+    scf_time_ls.append(scf_time.seconds)
 
     vstr = str(v).replace('.', 'p')
     dosname = 'dos' + vstr
@@ -425,6 +425,8 @@ for v in np.arange(v_start, v_end + v_step / 2, v_step):
     scftw = iw.IgorWave(np.array(scf_time_ls), name='scftime' + vstr)
     etotw.set_dimscale('x', v_start, v_step, '')
     scftw.set_dimscale('x', v_start, v_step, '')
+    etotw.set_datascale('eV')
+    scftw.set_datascale('sec')
     with open(convdir + 'scflog' + vstr + '.itx', 'w') as f:
       etotw.save_itx(f)
       scftw.save_itx(f)
