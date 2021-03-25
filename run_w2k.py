@@ -15,7 +15,7 @@ class W2k:
 		self.orb = 0  # +U on: 1, off: 0
 		self.spol = 1  # spin polarized calculation on: 1, off: 0
 		self.spin_ls = ['up', 'dn']
-		self.parallel = 1  # parallel on: 1, off: 0
+		self.parallel = 1  # parallel on: >1, off: 1
 
 		self.rkmax = 7
 		self.lmax = 10
