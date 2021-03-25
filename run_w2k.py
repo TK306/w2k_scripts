@@ -187,7 +187,7 @@ class W2k:
 		os.chdir(self.case_path)
 		subprocess.run(['restore_lapw', scf])
 
-	def run_dos(self, outfol, name, int_list=['total', 'END']):  # calculate DOS
+	def run_dos(self, outfol, name, int_list=['total']):  # calculate DOS
 		so = self.so
 		orb = self.orb
 		p = self.parallel
@@ -228,8 +228,8 @@ class W2k:
 			print('run ' + ' '.join(run_lapw2))
 			subprocess.run(run_lapw2)
 
-		print('run ' + ' '.join(['configure_int_lapw', '-b'] + int_list))
-		subprocess.run(['configure_int_lapw', '-b'] + int_list)
+		print('run ' + ' '.join(['configure_int_lapw', '-b'] + int_list + ['END']))
+		subprocess.run(['configure_int_lapw', '-b'] + int_list + ['END'])
 
 		if spol:
 			for spin in self.spin_ls:
