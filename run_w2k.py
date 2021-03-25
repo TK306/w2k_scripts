@@ -359,6 +359,6 @@ class W2k:
 					subprocess.call(["cp", self.filepath(".bandsup.agr"), outfol + name + ".bands.agr"])
 				else:
 					for spin in self.spin_ls:
-						subprocess.call(["cp", self.filepath(".bandsup.agr"), outfol + name + spin + ".bands.agr"])
+						subprocess.call(["cp", self.filepath(".bands" + up + ".agr"), outfol + name + spin + ".bands.agr"])
 			else:
 				subprocess.call(["cp", self.filepath(".bands.agr"), outfol + name + ".bands.agr"])
