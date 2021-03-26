@@ -161,6 +161,7 @@ def calc_NL_from_klists(ba_ls):  # calculate band dispersion
 		for kbf in fl:
 			if os.path.exists(w2k.case_path + 'stop.txt'):
 				print('stop.txt FILE DETECTED.')
+				sp.call(['rm', w2k.case_path + 'stop.txt'])
 				stop = 1
 				break
 			sp.call(['cp', kdir + kbf, w2k.filepath('.klist_band')])
