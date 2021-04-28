@@ -341,12 +341,12 @@ class W2k:
 				subprocess.run(run_spag)
 
 			if qtl:
-				if len(atom_ls) < q[0]:
+				if len(atom_ls) >= q[0]:
 					atom_name = atom_ls[q[0]]
 				else:
 					atom_name = 'Atom' + str(q[0])
 
-				if len(orbital_ls) < q[1]:
+				if len(orbital_ls) >= q[1]:
 					orb_name = orbital_ls[q[1]]
 				else:
 					orb_name = 'Orb' + str(q[1])
