@@ -38,7 +38,7 @@ def anal():
 	volup, voldn, e_dic = an.make_vox_vol(-3, 1, 0.01, 101, 101, outputdpath, 'ky_')
 	waveup = iw(volup, name='upspin')
 	waveup.set_dimscale('x', e_dic['Offset'], e_dic['Delta'], 'eV')
-	wavedn = iw(volup, name='dnspin')
+	wavedn = iw(voldn, name='dnspin')
 	wavedn.set_dimscale('x', e_dic['Offset'], e_dic['Delta'], 'eV')
 
 	waveup.save(outputdpath + 'bands_upspin.ibw')
