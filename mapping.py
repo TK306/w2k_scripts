@@ -35,7 +35,7 @@ def anal():
 
 	outputdpath = w2k.case_path + 'kxkymap/'
 
-	volup, voldn, e_dic = an.make_vox_vol(-3, 1, 0.01, 101, 101, outputdpath, 'ky_')
+	volup, voldn, e_dic = an.make_vox_vol(-3, 1, 0.01, 101, 101, outputdpath, 'ky_', spin=1)
 	waveup = iw(volup, name='upspin')
 	waveup.set_dimscale('x', e_dic['Offset'], e_dic['Delta'], 'eV')
 	wavedn = iw(voldn, name='dnspin')
@@ -43,6 +43,13 @@ def anal():
 
 	waveup.save(outputdpath + 'bands_upspin.ibw')
 	wavedn.save(outputdpath + 'bands_dnspin.ibw')
+
+	# nomagの場合の例
+	# vol, e_dic = an.make_vox_vol(-3, 1, 0.01, 101, 101, outputdpath, 'ky_', spin=0)
+	# wave = iw(volup, name='nomag')
+	# waveup.set_dimscale('x', e_dic['Offset'], e_dic['Delta'], 'eV')
+
+	# waveup.save(outputdpath + 'bands.ibw')
 
 if __name__ == '__main__':
 	run()

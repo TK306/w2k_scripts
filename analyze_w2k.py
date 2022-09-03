@@ -76,14 +76,19 @@ def load_dos(path):
 	return dos
 
 
-def make_vox_vol(e_s, e_e, e_st, kx_n, ky_n, datafol, filename):
+def make_vox_vol(e_s, e_e, e_st, kx_n, ky_n, datafol, filename, spin=1):  # spin 1: on, 0: off
 	e_n = int(round((e_e - e_s) / e_st) + 1)
 
-	volup = np.zeros((e_n, kx_n, ky_n))
-	voldn = np.zeros((e_n, kx_n, ky_n))
+	vol0 = np.zeros((e_n, kx_n, ky_n))
+	vol1 = np.zeros((e_n, kx_n, ky_n))
+
+	if spin:
+		spin_ls = ['up', 'dn']
+	else:
+		spin_ls = ['']
 
 	for ky in range(ky_n):
-		for s in ['up', 'dn']:
+		for s in spin_ls:
 			datapath = datafol + filename + str(ky) + s + '.bands.agr'
 			agr, wei = load_agr(datapath)
 			for band in range(agr.shape[0]):
@@ -91,11 +96,16 @@ def make_vox_vol(e_s, e_e, e_st, kx_n, ky_n, datafol, filename):
 					if (agr[band, kx] >= e_s and agr[band, kx] <= e_e):
 						ve = int(round((agr[band, kx] - e_s) / e_st))
 						if s == 'up':
-							volup[ve, kx, ky] = 1
+							vol0[ve, kx, ky] = 1
 						elif s == 'dn':
-							voldn[ve, kx, ky] = 1
+							vol1[ve, kx, ky] = 1
+						else:
+							vol0[ve, kx, ky] = 1
 
-	return volup, voldn, {'Offset': e_s, 'Delta': e_st, 'Size': e_n}
+	if spin:
+		return vol0, vol1, {'Offset': e_s, 'Delta': e_st, 'Size': e_n}
+	else:
+		return vol0, {'Offset': e_s, 'Delta': e_st, 'Size': e_n}
 
 
 def make_3Dband_array(kml, spin, dfpath, savepath):  # kml: [knumber y, knumber z]
