@@ -1,12 +1,18 @@
 import subprocess
 import numpy as np
 import os
+from typing import List
 
 # directory path string must finish with "/"
 
 
 class W2k:
-    def __init__(self, case_g):
+    def __init__(self, case_g: str) -> None:
+        """sessionに対応するインスタンス生成.
+
+        Args:
+            case_g (str): sessionフォルダの名前.
+        """
         self.case = case_g  # session name
         self.temp_path = "/usr/local/WIEN2k_17.1/SRC_templates/"  # template file path
         self.w2k_user = (
@@ -21,15 +27,20 @@ class W2k:
         self.parallel = 1  # parallel on: >1, off: 1
 
         self.rkmax = 7
-        self.lmax = 10
-        self.gmax = 12
+        self.__lmax = 10
+        self.__gmax = 12
         self.kmesh = 10000
 
         self.scf_ec = 0.0001  # energy convergence (Ry)
         self.scf_cc = None  # charge convergence (e)
         self.ni = 1  # -NI option
 
-    def set_parallel(self, p):  # make .machines file
+    def set_parallel(self, p: int) -> None:
+        """並列計算を設定.
+
+        Args:
+            p (int): 並列数.
+        """
         self.parallel = p
         machinespath = self.case_path + ".machines"
 
@@ -44,16 +55,29 @@ class W2k:
                 with open(machinespath, "w") as f:
                     f.write(ms)
 
-    def print_parameters(self):  # check parameters of class
+    def print_parameters(self) -> None:
+        """インスタンスに設定されているパラメータをprint."""
         for key, value in self.__dict__.items():
             print(key, ":", value)
 
-    def cp_from_temp(self, ext):  # copy template file with extension
+    def cp_from_temp(self, ext: str) -> None:
+        """テンプレートファイルをsessionにコピー.
+
+        Args:
+            ext (str): コピーしたいテンプレートファイルの拡張子
+        """
+        if not ext.startswith("."):
+            ext = f".{ext}"
         subprocess.call(
             ["cp", self.temp_path + "case" + ext, self.case_path + self.case + ext]
         )
 
-    def get_ef(self):  # find EF value from .scf file
+    def get_ef(self) -> float:
+        """.scfファイルからFermi Energyを抜き出す.
+
+        Returns:
+            float: Fermi Energy (eV)
+        """
         with open(self.filepath(".scf"), "r") as f:
             l = f.readlines()
         l0 = [i for i in l if i.startswith(":FER")]
@@ -62,7 +86,12 @@ class W2k:
         ef = float(l0[len(l0) - 1])
         return ef
 
-    def get_etot(self):  # find Total Energy value from .scf file
+    def get_etot(self) -> float:
+        """.scfファイルからTotal Energyを抜き出す.
+
+        Returns:
+            float: Total Energy (eV)
+        """
         with open(self.filepath(".scf"), "r") as f:
             l = f.readlines()
         l0 = [i for i in l if i.startswith(":ENE")]
@@ -71,7 +100,20 @@ class W2k:
         etot = float(l0[len(l0) - 1])
         return etot
 
-    def set_lmax(self, lmax):  # set lmax parameter for SCF calculation
+    @property
+    def lmax(self) -> float:
+        return self.__lmax
+
+    @lmax.setter
+    def lmax(self, val: float) -> None:
+        """SCF計算のlmax値を指定し, .in1ファイルに書き込む.
+
+        Args:
+            val (float): 設定値
+
+        ToDo:
+            * 小数点以下桁数に上限を設けないと, wien2k実行時にエラーが起きるかも？
+        """
         path = self.filepath(".in1")
         with open(path, "r") as f:
             s = f.readlines()
@@ -79,7 +121,7 @@ class W2k:
         for l in range(len(s)):
             if "R-MT*K-MAX" in s[l]:
                 out = s[l].split()
-                out[1] = str(lmax)
+                out[1] = str(val)
                 s[l] = " ".join(out)
             if not s[l].endswith("\n"):
                 s[l] += "\n"
@@ -89,7 +131,22 @@ class W2k:
         with open(path, "w") as f:
             f.write(s)
 
-    def set_gmax(self, gmax):  # set gmax parameter for SCF calculation
+        self.__lmax = val
+
+    @property
+    def gmax(self) -> float:
+        return self.__gmax
+
+    @gmax.setter
+    def gmax(self, val: float) -> None:
+        """SCF計算のGmax値を指定し, .in2ファイルに書き込む.
+
+        Args:
+            val (float): 設定値
+
+        ToDo:
+            * 小数点以下桁数に上限を設けないと, wien2k実行時にエラーが起きるかも？
+        """
         path = self.filepath(".in2")
         with open(path, "r") as f:
             s = f.readlines()
@@ -97,7 +154,7 @@ class W2k:
         for l in range(len(s)):
             if "GMAX" in s[l]:
                 out = s[l].split()
-                out[0] = str(gmax)
+                out[0] = str(val)
                 s[l] = " ".join(out)
             if not s[l].endswith("\n"):
                 s[l] += "\n"
@@ -107,7 +164,10 @@ class W2k:
         with open(path, "w") as f:
             f.write(s)
 
-    def init_lapw(self):  # run initialize calculation
+        self.__gmax = val
+
+    def init_lapw(self) -> None:
+        """initializeを実行する."""
         os.chdir(self.case_path)
         init_run = [
             "init_lapw",
@@ -138,16 +198,41 @@ class W2k:
         with open(self.filepath(".insp"), "w") as f:
             f.write(s)
 
-    def filepath(self, ext):  # return full path of file with extention
+    def filepath(self, ext: str) -> str:
+        """指定した拡張子を持つファイルのFull Pathを取得する.
+
+        Args:
+            ext (str): 拡張子
+
+        Returns:
+            str: Full Path
+        """
+        if not ext.startswith("."):
+            ext = f".{ext}"
         return self.case_path + self.case + ext
 
-    def BZinside(self, v):  # normalize v to 0 - 1
+    def BZinside(self, v: float) -> float:
+        """入力値を0から1の値に規格化する.
+        端は折りたたまれる.
+
+        Args:
+            v (float): 入力値
+
+        Returns:
+            float: 出力値
+        """
         v = np.mod(v, 2)
         if v > 1:
             v = 2 - v
         return v
 
-    def mod_insp_weight(self, atom, orb):  # modify insp file
+    def mod_insp_weight(self, atom: int, orb: int) -> None:
+        """.inspファイルにatomとorbを書き込む.
+
+        Args:
+            atom (int): 元素を指定する整数
+            orb (int): 軌道を指定する変数
+        """
         path = self.filepath(".insp")
 
         with open(path, "r") as f:
@@ -165,7 +250,8 @@ class W2k:
         with open(path, "w") as f:
             f.write(s)
 
-    def run_scf(self):  # run SCF cycle
+    def run_scf(self) -> None:
+        """SCF計算を実行する."""
         so = self.so
         orb = self.orb
         p = self.parallel
@@ -199,11 +285,23 @@ class W2k:
 
         subprocess.run(run_l)
 
-    def restore_lapw(self, scf):
-        os.chdir(self.case_path)
-        subprocess.run(["restore_lapw", scf])
+    def restore_lapw(self, name: str) -> None:
+        """SCF計算結果を呼び出す.
 
-    def run_dos(self, outfol, name, int_list=["total"]):  # calculate DOS
+        Args:
+            name (str): 保存名.
+        """
+        os.chdir(self.case_path)
+        subprocess.run(["restore_lapw", name])
+
+    def run_dos(self, outfol: str, name: str, int_list: List[str] = ["total"]) -> None:
+        """DOS計算実行.
+
+        Args:
+            outfol (str): 出力フォルダパス
+            name (str): 計算結果ファイル名
+            int_list (List[str], optional): 計算したい軌道成分のリスト. デフォルト値=["total"].
+        """
         so = self.so
         orb = self.orb
         p = self.parallel
@@ -278,8 +376,24 @@ class W2k:
                 n += 1
 
     def run_band(
-        self, outfol, name, qtl=0, qtl_ls=[[1, 0]], atom_ls=[""], orbital_ls=[""]
-    ):  # calculate band dispersion
+        self,
+        outfol: str,
+        name: str,
+        qtl: int = 0,
+        qtl_ls: List[List[int]] = [[1, 0]],
+        atom_ls: List[str] = [""],
+        orbital_ls: List[str] = [""],
+    ) -> None:
+        """バンド計算を実行.
+
+        Args:
+            outfol (str): 出力フォルダパス
+            name (str): 計算結果ファイル名
+            qtl (int, optional): 重み付け有無(たぶん). デフォルト値=0.
+            qtl_ls (List[List[int]], optional): 重み付けしたい[元素, 軌道]のリスト(たぶん). デフォルト値=[[1, 0]].
+            atom_ls (List[str], optional): 出力を見やすくするための元素名. 指定しない場合自動で命名される.
+            orbital_ls (List[str], optional): 出力を見やすくするための軌道名. 指定しない場合自動で命名される.
+        """
         os.chdir(self.case_path)
 
         if not outfol.startswith(self.case_path):

@@ -1,14 +1,15 @@
 import numpy as np
+from typing import List
 
 
 def main(
     output_name: str,
     kmeshx: int,
     kpath: list,
-    index_ls: list = [],
+    index_ls: List[str] = [],
     d: int = 0,
     echo: int = 1,
-):
+) -> None:
     kplen = []
 
     for kpi in range(len(kpath) - 1):
@@ -91,7 +92,7 @@ def main(
         print("END", file=f)
 
 
-def sonomama(output_name: str, kpath: list, d: int, echo: int = 0):
+def sonomama(output_name: str, kpath: List[List[float]], d: int, echo: int = 0) -> None:
     out_ls = []
     tail = "-8.00 8.00"
 
@@ -120,7 +121,7 @@ def sonomama(output_name: str, kpath: list, d: int, echo: int = 0):
         print("END", file=f)
 
 
-def fcc_temp(name, n):
+def fcc_temp(name: str, n: int) -> None:
     kpath = [
         [1, 0.5, 0],
         [0.5, 0.5, 0.5],
