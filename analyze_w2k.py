@@ -2,9 +2,14 @@ import numpy as np
 import subprocess as sp
 from igorwriter import IgorWave
 import os
+from typing import Union, List
+from pathlib import Path
 
 
-def load_agr(path):  # output: ndarray energy(band,kx), weight(band,kx)
+def load_agr(
+    path: Union[str, Path]
+):  # output: ndarray energy(band,kx), weight(band,kx)
+    path: str = str(path)
     if not path.endswith(".agr"):
         return 0
     with open(path, "r") as f:
@@ -46,7 +51,8 @@ def load_agr(path):  # output: ndarray energy(band,kx), weight(band,kx)
     return energy, weight
 
 
-def load_dos(path):
+def load_dos(path: Union[str, Path]):
+    path: Path = str(path)
     if not ".dos" in path:
         return 0
 
@@ -77,8 +83,16 @@ def load_dos(path):
 
 
 def make_vox_vol(
-    e_s, e_e, e_st, kx_n, ky_n, datafol, filename, spin=1
-):  # spin 1: on, 0: off
+    e_s: float,
+    e_e: float,
+    e_st: float,
+    kx_n: int,
+    ky_n: int,
+    datafol: Union[str, Path],
+    filename: str,
+    spin: bool = True,
+):
+    datafol = Path(datafol)
     e_n = int(round((e_e - e_s) / e_st) + 1)
 
     vol0 = np.zeros((e_n, kx_n, ky_n))
@@ -91,7 +105,7 @@ def make_vox_vol(
 
     for ky in range(ky_n):
         for s in spin_ls:
-            datapath = datafol + filename + str(ky) + s + ".bands.agr"
+            datapath = datafol / f"{filename}{ky}{s}.bands.agr"
             agr, wei = load_agr(datapath)
             for band in range(agr.shape[0]):
                 for kx in range(agr.shape[1]):
@@ -110,7 +124,11 @@ def make_vox_vol(
         return vol0, {"Offset": e_s, "Delta": e_st, "Size": e_n}
 
 
-def make_3Dband_array(kml, spin, dfpath, savepath):  # kml: [knumber y, knumber z]
+def make_3Dband_array(
+    kml, spin: str, dfpath: Union[str, Path], savepath: Union[str, Path]
+):  # kml: [knumber y, knumber z]
+    dfpath: Path = Path(dfpath)
+    savepath: Path = Path(savepath)
     dims = len(kml) + 1
     kmy = kml[0]
 
@@ -122,7 +140,7 @@ def make_3Dband_array(kml, spin, dfpath, savepath):  # kml: [knumber y, knumber 
     for kz in range(kmz):
         print(str(kz) + " / " + str(kmz - 1))
         for ky in range(kmy):
-            path = dfpath + "map_kz" + str(kz) + "_ky" + str(ky) + spin + ".bands.agr"
+            path = dfpath / f"map_kz{kz}_ky{ky}{spin}.bands.agr"
             agr, wei = load_agr(path)
             if len(agr.shape) < 2:
                 print(agr.shape)
@@ -185,8 +203,8 @@ def make_3Dband_array(kml, spin, dfpath, savepath):  # kml: [knumber y, knumber 
     np.save(savepath, ch)
 
 
-def get_NL_list(npypath, bandindex, cutoff):
-    ch = np.load(npypath)
+def get_NL_list(npypath: Union[str, Path], bandindex, cutoff):
+    ch = np.load(Path(npypath))
     print("npy data loaded")
     ba1 = bandindex - 1
     ba2 = bandindex
@@ -207,8 +225,10 @@ def get_NL_list(npypath, bandindex, cutoff):
     return NL_list
 
 
-def make_3Dband_ibw(npypath, savepath, name, e_s, e_e):
-    ch = np.load(npypath)
+def make_3Dband_ibw(
+    npypath: Union[str, Path], savepath: Union[str, Path], name, e_s, e_e
+):
+    ch = np.load(Path(npypath))
     print("npy data loaded")
     dims = len(ch.shape) - 1
     ky_s = -1
@@ -216,7 +236,7 @@ def make_3Dband_ibw(npypath, savepath, name, e_s, e_e):
     kz_s = -1
     kz_e = 1
 
-    sp.call(["mkdir", "-p", savepath])
+    sp.call(["mkdir", "-p", str(savepath)])
     if dims == 2:
         ch = np.transpose(ch, (1, 2, 0))
         print(ch.shape)
@@ -234,18 +254,19 @@ def make_3Dband_ibw(npypath, savepath, name, e_s, e_e):
     ky_st = (ky_e - ky_s) / (ky_n - 1)
 
     for ba in range(ch.shape[0]):
-        out = savepath + name + "_Band" + str(ba + 1) + ".ibw"
+        out = savepath / f"{name}_Band{ba + 1}.ibw"
         if np.amax(ch[ba]) >= e_s and np.amin(ch[ba]) <= e_e:
-            wave = IgorWave(ch[ba], name=name + "_Band" + str(ba + 1))
+            wave = IgorWave(ch[ba], name=out.stem)
             wave.set_dimscale("x", ky_s, ky_st, "2pi/a")
             wave.set_dimscale("y", ky_s, ky_st, "2pi/a")
             if dims == 3:
                 wave.set_dimscale("z", kz_s, kz_st, "2pi/a")
             wave.save(out)
-            print("save : " + out)
+            print("save : {out}")
 
 
-def make_dos_waves(path_list):
+def make_dos_waves(path_list: List[Union[str, Path]]):
+    path_list: List[Path] = [Path(s) for s in path_list]
     for rt in path_list:
         print(rt)
 
@@ -273,8 +294,8 @@ def make_dos_waves(path_list):
                 elif sp == "dn":
                     r = -1
                 en = 0
-                wp = rt + head + "_dos.itx"
-                path = rt + f
+                wp = rt / f"{head}_dos.itx"
+                path = rt / f
                 dos = load_dos(path)
                 for ky in dos.keys():
                     ws[ky + sp] = dos[ky] * r

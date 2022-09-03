@@ -12,16 +12,16 @@ w2k.set_parallel(4)
 
 etot_ls = []
 scf_time_ls = []
-convdir = w2k.case_path + "conv/rkmax/"
-dosout = convdir + "dos/"
-scfout = convdir + "scf/"
+convdir = w2k.case_path / "conv" / "rkmax"
+dosout = convdir / "dos"
+scfout = convdir / "scf"
 os.makedirs(dosout, exist_ok=True)
 os.makedirs(scfout, exist_ok=True)
 v_start = 5
 v_step = 0.5
 v_end = 10
 for v in np.arange(v_start, v_end + v_step / 2, v_step):
-    if not os.path.exists(w2k.case_path + "stop.txt"):
+    if not os.path.exists(w2k.case_path / "stop.txt"):
         w2k.rkmax = v
         w2k.lmax = 10
         w2k.kmesh = 10000
@@ -42,7 +42,7 @@ for v in np.arange(v_start, v_end + v_step / 2, v_step):
         scfname = "scf" + vstr
         w2k.run_dos(dosout, dosname)
 
-        sp.run(["cp", w2k.filepath(".scf"), scfout + scfname + ".scf"])
+        sp.run(["cp", w2k.filepath(".scf"), str(scfout / f"{scfname}.scf")])
 
         etotw = iw.IgorWave(np.array(etot_ls), name="etot")
         scftw = iw.IgorWave(np.array(scf_time_ls), name="scftime")
@@ -50,7 +50,7 @@ for v in np.arange(v_start, v_end + v_step / 2, v_step):
         scftw.set_dimscale("x", v_start, v_step, "")
         etotw.set_datascale("eV")
         scftw.set_datascale("sec")
-        with open(convdir + "scflog.itx", "w") as f:
+        with open(convdir / "scflog.itx", "w") as f:
             etotw.save_itx(f)
             scftw.save_itx(f)
-        an.make_dos_waves([dosout])
+        an.make_dos_waves([str(dosout)])

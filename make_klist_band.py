@@ -8,7 +8,7 @@ def main(
     kpath: list,
     index_ls: List[str] = [],
     d: int = 0,
-    echo: int = 1,
+    echo: bool = True,
 ) -> None:
     kplen = []
 
@@ -30,7 +30,7 @@ def main(
     out_ls = []
     tail = "-8.00 8.00"
 
-    if echo == 1:
+    if echo:
         print("OUTPUT ----> " + output_name)
         print("Index  Label  k-vector")
 
@@ -43,7 +43,7 @@ def main(
             minwid = min(kpd)
         i_s = ind[kpi]
         i_ee = ind[kpi + 1]
-        if echo == 1:
+        if echo:
             if kpi < len(index_ls):
                 head = index_ls[kpi]
             else:
@@ -51,7 +51,7 @@ def main(
             print("{:<7}".format(i_s) + "{:7}".format(head) + str(kps))
         if kpi == len(kplen) - 1:
             i_e = i_ee + 1
-            if echo == 1:
+            if echo:
                 if kpi < len(index_ls) - 1:
                     head = index_ls[kpi + 1]
                 else:
@@ -96,7 +96,7 @@ def sonomama(output_name: str, kpath: List[List[float]], d: int, echo: int = 0) 
     out_ls = []
     tail = "-8.00 8.00"
 
-    if echo == 1:
+    if echo:
         print("OUTPUT ----> " + output_name)
 
     for kpi in range(len(kpath)):

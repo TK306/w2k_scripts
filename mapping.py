@@ -9,12 +9,12 @@ import datetime as dt  # optional
 def run():
     session = "Co2MnGa"
     w2k = run_w2k.W2k(session)
-    w2k.spol = 1
+    w2k.spol = True
     w2k.spin_ls = ["up", "dn"]
 
     w2k.set_ef_insp()
 
-    outputdpath = w2k.case_path + "kxkymap/"
+    outputdpath = w2k.case_path / "kxkymap"
     sp.run(["mkdir", "-p", outputdpath])
 
     kxn = 101

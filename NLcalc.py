@@ -10,16 +10,16 @@ import os
 w2k = run_w2k.W2k("Co2MnGa")
 w2k.parallel = 1
 w2k.set_parallel(w2k.parallel)
-w2k.spol = 1
+w2k.spol = True
 w2k.spin_ls = ["up"]
 w2k.print_parameters()
 
 
 def mapall():  # calculate all BZ coarsely
-    outfol = w2k.case_path + "mapall/"
+    outfol = w2k.case_path / "mapall"
 
-    sp.call(["mkdir", "-p", outfol + "klist/"])
-    sp.call(["mkdir", "-p", outfol + "data/"])
+    sp.call(["mkdir", "-p", str(outfol / "klist")])
+    sp.call(["mkdir", "-p", str(outfol / "data")])
     t_st = dt.datetime.now()
     nx = 100
     ny = 100
@@ -38,10 +38,10 @@ def mapall():  # calculate all BZ coarsely
                 [
                     "cp",
                     w2k.filepath(".klist_band"),
-                    outfol + "klist/" + name + ".klist_band",
+                    str(outfol / "klist" / f"{name}.klist_band"),
                 ]
             )
-            w2k.run_band(outfol + "data/", name)
+            w2k.run_band(outfol / "data", name)
             t_n = dt.datetime.now()
             c += 1
             print("finish : " + str((t_n - t_st) / c * (ny + 1) * (nz + 1) + t_st))
@@ -51,19 +51,19 @@ def make_3Dband_npy():
     anal.make_3Dband_array(
         [101, 101],
         "up",
-        w2k.case_path + "mapall/data/",
-        w2k.case_path + "mapall/data.npy",
+        w2k.case_path / "mapall" / "data",
+        w2k.case_path / "mapall" / "data.npy",
     )
 
 
 def get_NLlist_coarse(ba_l):  # get coarse NL list between selected band
     for ba in ba_l:
-        nl = anal.get_NL_list(w2k.case_path + "mapall/data.npy", ba, 0.015)
+        nl = anal.get_NL_list(w2k.case_path / "mapall" / "data.npy", ba, 0.015)
         nl = rmv_data_xyz_sym(nl)
         nl = nl / 100
         print(nl)
         print(nl.shape)
-        np.save(w2k.case_path + "mapall/NL_" + str(ba) + ".npy", nl)
+        np.save(w2k.case_path / "mapall" / f"NL_{ba}.npy", nl)
 
 
 def rmv_data_xyz_sym(ar):  # reduce k points according to xyz symmetry
@@ -88,8 +88,8 @@ def make_klist_NL(ba_ls):  # make .klist_band files
         return vec
 
     for ba in ba_ls:
-        nldir = w2k.case_path + "NLs/NL_" + str(ba) + "/"
-        nl = np.load(w2k.case_path + "mapall/NL_" + str(ba) + ".npy")
+        nldir = w2k.case_path / "NLs" / f"NL_{ba}"
+        nl = np.load(w2k.case_path / "mapall" / f"NL_{ba}.npy")
         nl = list(nl)
         km = 900  # maximum number of k points in each .klist_band file
         d = 5000  # density of BZ for fine NL calculation
@@ -154,12 +154,12 @@ def make_klist_NL(ba_ls):  # make .klist_band files
 
         print(len(klist_all), k_all)
 
-        kbout = w2k.case_path + "NLs/NL_" + str(ba) + "/klist/"
+        kbout = w2k.case_path / "NLs" / f"NL_{ba}" / "klist"
 
-        sp.call(["mkdir", "-p", kbout])
+        sp.call(["mkdir", "-p", str(kbout)])
 
-        if os.path.exists(nldir + "NL" + str(ba) + "_k_data.npy"):
-            data_k = np.load(nldir + "NL" + str(ba) + "_k_data.npy")
+        if os.path.exists(nldir / f"NL{ba}_k_data.npy"):
+            data_k = np.load(nldir / f"NL{ba}_k_data.npy")
             data_k = set([vec2int(v * d) for v in list(data_k)])
             klist_all = klist_all - data_k
 
@@ -168,10 +168,8 @@ def make_klist_NL(ba_ls):  # make .klist_band files
         klist_out = []
         for kp in klist_all:
             if len(klist_out) > km:
-                np.save(kbout + "klist_" + str(fn), np.array(klist_out))
-                kb.sonomama(
-                    kbout + "klist_" + str(fn) + ".klist_band", klist_out, 5000, 0
-                )
+                np.save(kbout / f"klist_{fn}", np.array(klist_out))
+                kb.sonomama(kbout / f"klist_{fn}.klist_band", klist_out, 5000, 0)
                 klist_out = []
                 fn += 1
 
@@ -183,10 +181,10 @@ def calc_NL_from_klists(ba_ls):  # calculate band dispersion
     for ba in ba_ls:
         if stop:
             break
-        nldir = w2k.case_path + "NLs/NL_" + str(ba) + "/"
-        bdir = nldir + "band/"
-        kdir = nldir + "klist/"
-        sp.call(["mkdir", "-p", bdir])
+        nldir = w2k.case_path / "NLs" / f"NL_{ba}"
+        bdir = nldir / "band"
+        kdir = nldir / "klist"
+        sp.call(["mkdir", "-p", str(bdir)])
         fl = os.listdir(kdir)
         fl = [f for f in fl if ".klist_band" in f]
         fl.sort()
@@ -194,15 +192,15 @@ def calc_NL_from_klists(ba_ls):  # calculate band dispersion
         c = 0
         t_st = dt.datetime.now()
 
-        fl = [f for f in fl if not os.path.exists(bdir + f[:-11] + "up.bands.agr")]
+        fl = [f for f in fl if not os.path.exists(bdir / f"{f[:-11]}up.bands.agr")]
 
         for kbf in fl:
-            if os.path.exists(w2k.case_path + "stop.txt"):
+            if os.path.exists(w2k.case_path / "stop.txt"):
                 print("stop.txt FILE DETECTED.")
-                sp.call(["rm", w2k.case_path + "stop.txt"])
+                sp.call(["rm", w2k.case_path / "stop.txt"])
                 stop = 1
                 break
-            sp.call(["cp", kdir + kbf, w2k.filepath(".klist_band")])
+            sp.call(["cp", str(kdir / kbf), w2k.filepath(".klist_band")])
             w2k.run_band(bdir, kbf[:-11])
             t_n = dt.datetime.now()
             c += 1
@@ -228,18 +226,18 @@ def get_NLlist_fine(ba_ls):  # get fine NL list between selected band
         return narr
 
     for ba in ba_ls:
-        nldir = w2k.case_path + "NLs/NL_" + str(ba) + "/"
-        bdir = nldir + "band/"
-        kdir = nldir + "klist/"
+        nldir = w2k.case_path / "NLs" / f"NL_{ba}"
+        bdir = nldir / "band"
+        kdir = nldir / "klist"
 
         fl = os.listdir(kdir)
         fl = [f[:-4] for f in fl if ".npy" in f]
         fl.sort()
 
-        if os.path.exists(nldir + "NL" + str(ba) + "_k_data.npy"):
-            out_k = np.load(nldir + "NL" + str(ba) + "_k_data.npy")
-            out_e = np.load(nldir + "NL" + str(ba) + "_e_data.npy")
-            out_g = np.load(nldir + "NL" + str(ba) + "_g_data.npy")
+        if os.path.exists(nldir / f"NL{ba}_k_data.npy"):
+            out_k = np.load(nldir / f"NL{ba}_k_data.npy")
+            out_e = np.load(nldir / f"NL{ba}_e_data.npy")
+            out_g = np.load(nldir / f"NL{ba}_g_data.npy")
         else:
             out_k = np.zeros((0, 3))
             out_e = np.zeros((0))
@@ -247,8 +245,8 @@ def get_NLlist_fine(ba_ls):  # get fine NL list between selected band
 
         for f in fl:
             print(f)
-            kp = np.load(kdir + f + ".npy")
-            eng, _ = anal.load_agr(bdir + f + "up.bands.agr")
+            kp = np.load(kdir / f"{f}.npy")
+            eng, _ = anal.load_agr(bdir / f"{f}up.bands.agr")
             eng_1 = eng[ba - 1]
             eng_2 = eng[ba]
             eng_d = eng_2 - eng_1
@@ -260,9 +258,9 @@ def get_NLlist_fine(ba_ls):  # get fine NL list between selected band
             else:
                 print("ERROR: wrong data in " + f)
 
-        np.save(nldir + "NL" + str(ba) + "_k_data.npy", out_k)
-        np.save(nldir + "NL" + str(ba) + "_e_data.npy", out_e)
-        np.save(nldir + "NL" + str(ba) + "_g_data.npy", out_g)
+        np.save(nldir / f"NL{ba}_k_data.npy", out_k)
+        np.save(nldir / f"NL{ba}_e_data.npy", out_e)
+        np.save(nldir / f"NL{ba}_g_data.npy", out_g)
 
         cutoff = 0.001  # degenerate cutoff parameter
 
@@ -309,17 +307,17 @@ def get_NLlist_fine(ba_ls):  # get fine NL list between selected band
         out_e = np.concatenate([out_e1, out_e1])
         out_g = np.concatenate([out_g1, out_g1])
 
-        np.save(nldir + "NL" + str(ba) + "_k.npy", out_k)
-        wave = iw.IgorWave(out_k, name="NL" + str(ba) + "_k")
-        wave.save(nldir + "NL" + str(ba) + "_k.ibw")
+        np.save(nldir / f"NL{ba}_k.npy", out_k)
+        wave = iw.IgorWave(out_k, name=f"NL{ba}_k")
+        wave.save(nldir / f"NL{ba}_k.ibw")
 
-        np.save(nldir + "NL" + str(ba) + "_e.npy", out_e)
-        wave = iw.IgorWave(out_e, name="NL" + str(ba) + "_e")
-        wave.save(nldir + "NL" + str(ba) + "_e.ibw")
+        np.save(nldir / f"NL{ba}_e.npy", out_e)
+        wave = iw.IgorWave(out_e, name=f"NL{ba}_e")
+        wave.save(nldir / f"NL{ba}_e.ibw")
 
-        np.save(nldir + "NL" + str(ba) + "_g.npy", out_g)
-        wave = iw.IgorWave(out_g, name="NL" + str(ba) + "_g")
-        wave.save(nldir + "NL" + str(ba) + "_g.ibw")
+        np.save(nldir / f"NL{ba}_g.npy", out_g)
+        wave = iw.IgorWave(out_g, name=f"NL{ba}_g")
+        wave.save(nldir / f"NL{ba}_g.ibw")
 
 
 if __name__ == "__main__":

@@ -1,9 +1,8 @@
 import subprocess
 import numpy as np
 import os
-from typing import List
-
-# directory path string must finish with "/"
+from typing import List, Optional, Union
+from pathlib import Path
 
 
 class W2k:
@@ -13,27 +12,29 @@ class W2k:
         Args:
             case_g (str): sessionフォルダの名前.
         """
-        self.case = case_g  # session name
-        self.temp_path = "/usr/local/WIEN2k_17.1/SRC_templates/"  # template file path
-        self.w2k_user = (
-            "/Users/kounotakashi/WIEN2k_17.1_user/"  # wien2k user folder path
+        self.case: str = case_g  # session name
+        self.temp_path: Path = Path(
+            "/usr/local/WIEN2k_17.1/SRC_templates"
+        )  # template file path
+        self.w2k_user: Path = Path(
+            "/Users/kounotakashi/WIEN2k_17.1_user"  # wien2k user folder path
         )
-        self.case_path = self.w2k_user + self.case + "/"  # session path
+        self.case_path = self.w2k_user / self.case  # session path
 
-        self.so = 0  # spin orbit on: 1, off: 0
-        self.orb = 0  # +U on: 1, off: 0
-        self.spol = 1  # spin polarized calculation on: 1, off: 0
-        self.spin_ls = ["up", "dn"]
-        self.parallel = 1  # parallel on: >1, off: 1
+        self.so: bool = False  # spin orbit
+        self.orb: bool = False  # +U
+        self.spol: bool = True  # spin polarized calculation
+        self.spin_ls: List[str] = ["up", "dn"]
+        self.parallel: int = 1  # parallel on: >1, off: 1
 
-        self.rkmax = 7
-        self.__lmax = 10
-        self.__gmax = 12
-        self.kmesh = 10000
+        self.rkmax: float = 7
+        self.__lmax: float = 10
+        self.__gmax: float = 12
+        self.kmesh: int = 10000
 
-        self.scf_ec = 0.0001  # energy convergence (Ry)
-        self.scf_cc = None  # charge convergence (e)
-        self.ni = 1  # -NI option
+        self.scf_ec: float = 0.0001  # energy convergence (Ry)
+        self.scf_cc: Optional[float] = None  # charge convergence (e)
+        self.ni: bool = True  # -NI option
 
     def set_parallel(self, p: int) -> None:
         """並列計算を設定.
@@ -42,7 +43,7 @@ class W2k:
             p (int): 並列数.
         """
         self.parallel = p
-        machinespath = self.case_path + ".machines"
+        machinespath: Path = self.case_path / ".machines"
 
         if p > 1:
             subprocess.call(["cp", self.temp_path + ".machines", machinespath])
@@ -69,7 +70,11 @@ class W2k:
         if not ext.startswith("."):
             ext = f".{ext}"
         subprocess.call(
-            ["cp", self.temp_path + "case" + ext, self.case_path + self.case + ext]
+            [
+                "cp",
+                str(self.temp_path / f"case{ext}"),
+                str(self.case_path / f"{self.case}.{ext}"),
+            ]
         )
 
     def get_ef(self) -> float:
@@ -199,7 +204,7 @@ class W2k:
             f.write(s)
 
     def filepath(self, ext: str) -> str:
-        """指定した拡張子を持つファイルのFull Pathを取得する.
+        """指定した拡張子を持つファイルのFull Pathをstr型で取得する.
 
         Args:
             ext (str): 拡張子
@@ -209,7 +214,7 @@ class W2k:
         """
         if not ext.startswith("."):
             ext = f".{ext}"
-        return self.case_path + self.case + ext
+        return str(self.case_path / f"{self.case}.{ext}")
 
     def BZinside(self, v: float) -> float:
         """入力値を0から1の値に規格化する.
@@ -253,7 +258,7 @@ class W2k:
     def run_scf(self) -> None:
         """SCF計算を実行する."""
         so = self.so
-        orb = self.orb
+        orb = self.orb  # +U計算
         p = self.parallel
         spol = self.spol
 
@@ -294,16 +299,19 @@ class W2k:
         os.chdir(self.case_path)
         subprocess.run(["restore_lapw", name])
 
-    def run_dos(self, outfol: str, name: str, int_list: List[str] = ["total"]) -> None:
+    def run_dos(
+        self, outfol: Union[str, Path], name: str, int_list: List[str] = ["total"]
+    ) -> None:
         """DOS計算実行.
 
         Args:
-            outfol (str): 出力フォルダパス
+            outfol (Union[str, Path]): 出力フォルダパス
             name (str): 計算結果ファイル名
             int_list (List[str], optional): 計算したい軌道成分のリスト. デフォルト値=["total"].
         """
+        outfol: Path = Path(outfol)
         so = self.so
-        orb = self.orb
+        orb = self.orb  # +U計算
         p = self.parallel
         spol = self.spol
 
@@ -354,7 +362,7 @@ class W2k:
             print("run " + " ".join(run_tetra))
             subprocess.run(run_tetra)
 
-        subprocess.call(["mkdir", "-p", outfol])
+        subprocess.call(["mkdir", "-p", str(outfol)])
 
         if spol:
             sp = len(self.spin_ls)
@@ -367,19 +375,19 @@ class W2k:
                 spin = ""
             n = 1
             while 1:
-                path = self.filepath(".dos" + str(n) + "eV" + spin)
-                savepath = outfol + name + ".dos" + str(n) + "eV" + spin
+                path = self.filepath(f".dos{n}eV{spin}")
+                savepath = outfol / f"{name}.dos{n}eV{spin}"
                 if os.path.exists(path):
-                    subprocess.call(["cp", path, savepath])
+                    subprocess.call(["cp", path, str(savepath)])
                 else:
                     break
                 n += 1
 
     def run_band(
         self,
-        outfol: str,
+        outfol: Union[str, Path],
         name: str,
-        qtl: int = 0,
+        qtl: bool = False,
         qtl_ls: List[List[int]] = [[1, 0]],
         atom_ls: List[str] = [""],
         orbital_ls: List[str] = [""],
@@ -387,20 +395,22 @@ class W2k:
         """バンド計算を実行.
 
         Args:
-            outfol (str): 出力フォルダパス
+            outfol (Union[str, Path]): 出力フォルダパス
             name (str): 計算結果ファイル名
-            qtl (int, optional): 重み付け有無(たぶん). デフォルト値=0.
+            qtl (bool, optional): 重み付け有無(たぶん). デフォルト値=False.
             qtl_ls (List[List[int]], optional): 重み付けしたい[元素, 軌道]のリスト(たぶん). デフォルト値=[[1, 0]].
             atom_ls (List[str], optional): 出力を見やすくするための元素名. 指定しない場合自動で命名される.
             orbital_ls (List[str], optional): 出力を見やすくするための軌道名. 指定しない場合自動で命名される.
         """
         os.chdir(self.case_path)
 
+        outfol: Path = Path(outfol)
+
         if not outfol.startswith(self.case_path):
             outfol = self.case_path + outfol
 
         so = self.so
-        orb = self.orb
+        orb = self.orb  # +U計算
         spol = self.spol
         p = self.parallel
 
@@ -455,9 +465,9 @@ class W2k:
             print("run " + " ".join(run_lapw2))
             subprocess.run(run_lapw2)
 
-        subprocess.call(["mkdir", "-p", outfol])
+        subprocess.call(["mkdir", "-p", str(outfol)])
 
-        if qtl == 0:
+        if not qtl:
             qtl_ls = [[0, 1]]
 
         for q in qtl_ls:
@@ -502,7 +512,7 @@ class W2k:
                         [
                             "cp",
                             self.filepath(".bandsup.agr"),
-                            outfol + name + ".bands.agr",
+                            str(outfol / f"{name}.bands.agr"),
                         ]
                     )
                 else:
@@ -511,10 +521,14 @@ class W2k:
                             [
                                 "cp",
                                 self.filepath(".bands" + spin + ".agr"),
-                                outfol + name + spin + ".bands.agr",
+                                str(outfol / f"{name}{spin}.bands.agr"),
                             ]
                         )
             else:
                 subprocess.call(
-                    ["cp", self.filepath(".bands.agr"), outfol + name + ".bands.agr"]
+                    [
+                        "cp",
+                        self.filepath(".bands.agr"),
+                        str(outfol / f"{name}.bands.agr"),
+                    ]
                 )
