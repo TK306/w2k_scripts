@@ -46,10 +46,10 @@ def anal():
 
 	# nomagの場合の例
 	# vol, e_dic = an.make_vox_vol(-3, 1, 0.01, 101, 101, outputdpath, 'ky_', spin=0)
-	# wave = iw(volup, name='nomag')
-	# waveup.set_dimscale('x', e_dic['Offset'], e_dic['Delta'], 'eV')
+	# wave = iw(vol, name='nomag')
+	# wave.set_dimscale('x', e_dic['Offset'], e_dic['Delta'], 'eV')
 
-	# waveup.save(outputdpath + 'bands.ibw')
+	# wave.save(outputdpath + 'bands.ibw')
 
 if __name__ == '__main__':
 	run()
